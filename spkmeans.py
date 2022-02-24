@@ -6,6 +6,7 @@ import pandas as pd
 # To use this run in the terminal: python setup.py build_ext --inplace
 # And on Nova: python3.8.5 setup.py build_ext --inplace
 
+
 # this function receives k, the number of centroids needed. and data_points numpy array which holds the vectors data.
 # this function returns numpy array of k centroids, chosen by the k-means++ algorithm.
 def k_means_initialization(k, data_points,printIndex=False):
@@ -45,6 +46,7 @@ def k_means_initialization(k, data_points,printIndex=False):
 # this function calculates the Euclid's l2 norm between two vectors
 def norm(vector1, vector2):
     return sum((vector1 - vector2) ** 2)
+
 
 # this function checks the condition if it is not true it will print "Invalid Input!" and exit
 def validate(condition):

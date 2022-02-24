@@ -206,3 +206,54 @@ void zero_array_2d(double **arr, int r, int c) {
         }
     }
 }
+
+/*
+ NEW CODE
+*/
+
+/*
+ this function takes the data points matrix and creates the weighted matrix W[nXn]
+ that represent the weight between every two data points
+ while n represent the amount of data points received
+ the function returns the W matrix
+*/
+
+double** weighted_matrix(double** data_points_array){
+    double** weighted_matrix = allocate_array_2d(num_rows, num_rows);
+    for (int i = 0; i < num_rows; ++i) {
+        for (int j = 0; j < num_rows; ++j) {
+            if(i==j){
+                weighted_matrix[i][j] = 0;
+            }
+            if(j < i){
+                weighted_matrix[i][j] = weighted_matrix[j][i];
+            }
+            if(i < j){
+                weighted_matrix[i][j] = weight(data_points_array[i],data_points_array[j]);
+            }
+        }
+    }
+    return weighted_matrix;
+}
+
+/*
+ this is the weight function as followed-
+  wij = exp(-(l_norm||dt1,dt2|| / 2))
+  while l_norm is as followed-
+  l_norm||dt1,dt2|| = sqrt_root(sum_i((dt1[i] - dt2[i])^2))
+*/
+
+double weight(double* data_point_1, double* data_point_2){
+    double sum = 0;
+    for(int i=0; i < d; i++){
+        double sub = data_point_1[i] - data_point_2[i];
+        sum += pow(sub,2);
+    }
+    sum = sqrt(sum);
+    sum = -sum / 2;
+    return exp(sum);
+}
+
+/* TODO: D matrix & matrix multiplication.
+ *
+*/

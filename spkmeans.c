@@ -106,7 +106,7 @@ void algorithm(int k, int d, int num_rows, int max_iter, double **data_points) {
     double *sum_diff_centroids,*num_elements_in_cluster;
     double **centroids,**new_centroids,**clusters; //each centroid represent cluster (the average of the cluster)
 
-    centroids = allocate_array_2d(k, d);
+    centroids = allocate_array_2d(k, d); //TODO: free this array
     init_centroids(k,d,centroids,data_points);
     num_elements_in_cluster = calloc(k, sizeof(int));
     error_occurred(num_elements_in_cluster == NULL);

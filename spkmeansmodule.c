@@ -109,7 +109,7 @@ static PyMethodDef capiMethods[] = {
 /* This initiates the module using the above definitions. */
 static struct PyModuleDef moduledef = {
         PyModuleDef_HEAD_INIT,
-        "mykmeanssp", /* name of module */
+        "spkmeans", /* name of module */
         NULL, /* module documentation, may be NULL */
         -1,  /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
         capiMethods /* the PyMethodDef array from before containing the methods of the extension */
@@ -123,7 +123,7 @@ static struct PyModuleDef moduledef = {
  * This should be the only non-static item defined in the module file
  */
 PyMODINIT_FUNC
-PyInit_mykmeanssp(void)
+PyInit_spkmeans(void)
 {
     PyObject *m;
     m = PyModule_Create(&moduledef);

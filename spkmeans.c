@@ -2,11 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include "spkmeans.h"
 
-int k, max_iter, num_rows, d = 1;
-int *num_elements_in_cluster;
-double **data_points, **centroids, **new_centroids, **clusters;
-double epsilon;
 
 /*
 this function handles error,
@@ -26,7 +23,7 @@ by the smallest squared distance from a centroid
 it returns the index of the cluster in the array
 */
 
-int find_closets_cluster(double *data_point) {
+int find_closets_cluster(int k,int d,double *data_point, double **centroids) {
     double *difference, *current_mu, sum, min_sum;
     int index = 0, i;
 
@@ -34,7 +31,7 @@ int find_closets_cluster(double *data_point) {
     error_occurred(difference == NULL);
     for (i = 0; i < k; i++) {
         current_mu = centroids[i];
-        sum = calculate_distance_squared(current_mu, data_point);
+        sum = calculate_distance_squared(current_mu, data_point,d);
         difference[i] = sum;
     }
     min_sum = difference[0];
@@ -53,14 +50,14 @@ the function iterate through all the data points and assigns each to the closest
 it calculates the num elements in each cluster
 */
 
-void set_clusters() {
+void set_clusters(int k,int d, int num_rows, double *num_elements_in_cluster,double **centroids, double **clusters, double **data_points) {
     int index, i, a;
 
     for (i = 0; i < k; i++) {
         num_elements_in_cluster[i] = 0;
     }
     for (i = 0; i < num_rows; i++) {
-        index = find_closets_cluster(data_points[i]);
+        index = find_closets_cluster(k,d,data_points[i],centroids);
         for (a = 0; a < d; a++) {
             clusters[index][a] += data_points[i][a];
         }
@@ -71,7 +68,7 @@ void set_clusters() {
 /*
 the function calculate the centroids by the new clusters that was already calculated
 */
-void calculate_new_centroids() {
+void calculate_new_centroids(int k,int d,const double *num_elements_in_cluster,double** new_centroids, double **clusters) {
     double *cluster;
     int len_cluster, i, j;
 
@@ -88,7 +85,7 @@ void calculate_new_centroids() {
 the function calculate the squared distance of two points
 */
 
-double calculate_distance_squared(double *a, double *b) {
+double calculate_distance_squared(double *a, double *b, int d) {
     double distance = 0;
     int i = d;
     while (i--) {
@@ -103,14 +100,20 @@ every iteration it calculates the clusters and then updates the centroids
 when the difference squared distance of all the centroids is smaller than epsilon we stop and return the centroids
 */
 
-void algorithm() {
+void algorithm(int k, int d, int num_rows, int max_iter, double **data_points) {
     int i, j;
-    double *sum_diff_centroids;
-    double diff, sq_diff, max;
+    double diff, sq_diff, max, epsilon = 0.001;
+    double *sum_diff_centroids,*num_elements_in_cluster;
+    double **centroids,**new_centroids,**clusters; //each centroid represent cluster (the average of the cluster)
+
+    centroids = allocate_array_2d(k, d);
+    init_centroids(k,d,centroids,data_points);
     num_elements_in_cluster = calloc(k, sizeof(int));
+    error_occurred(num_elements_in_cluster == NULL);
     clusters = allocate_array_2d(k, d);
     new_centroids = allocate_array_2d(k, d);
     sum_diff_centroids = calloc(k, sizeof(double));
+    error_occurred(sum_diff_centroids == NULL);
     while (max_iter > 0) {
         for (j = 0; j < k; j++) {
             sum_diff_centroids[j] = 0;
@@ -121,14 +124,14 @@ void algorithm() {
 
         error_occurred(num_elements_in_cluster == NULL);
 
-        set_clusters();
-        calculate_new_centroids();
+        set_clusters(k,d,num_rows,num_elements_in_cluster,centroids,clusters,data_points);
+        calculate_new_centroids(k,d,num_elements_in_cluster,new_centroids,clusters);
 
         max_iter--;
         error_occurred(sum_diff_centroids == NULL);
 
         for (i = 0; i < k; i++) {
-            diff = calculate_distance_squared(centroids[i], new_centroids[i]);
+            diff = calculate_distance_squared(centroids[i], new_centroids[i],d);
             sq_diff = pow(diff, 0.5);
             sum_diff_centroids[i] = sq_diff;
         }
@@ -207,6 +210,16 @@ void zero_array_2d(double **arr, int r, int c) {
     }
 }
 
+void init_centroids(int k,int d,double **centroids, double **data_points) {
+    int i, j;
+    for (i = 0; i < k; i++) {
+        for (j = 0; j < d; j++) {
+            centroids[i][j] = data_points[i][j];
+        }
+    }
+
+}
+
 /*
  NEW CODE
 */
@@ -218,7 +231,7 @@ void zero_array_2d(double **arr, int r, int c) {
  the function returns the W matrix
 */
 
-double** weighted_matrix(double** data_points_array){
+double** weighted_matrix(int num_rows, double** data_points_array){
     double** weighted_matrix = allocate_array_2d(num_rows, num_rows);
     for (int i = 0; i < num_rows; ++i) {
         for (int j = 0; j < num_rows; ++j) {
@@ -243,7 +256,7 @@ double** weighted_matrix(double** data_points_array){
   l_norm||dt1,dt2|| = sqrt_root(sum_i((dt1[i] - dt2[i])^2))
 */
 
-double weight(double* data_point_1, double* data_point_2){
+double weight(double* data_point_1, double* data_point_2, int d){
     double sum = 0;
     for(int i=0; i < d; i++){
         double sub = data_point_1[i] - data_point_2[i];

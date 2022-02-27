@@ -51,7 +51,7 @@ setup(
             # the qualified name of the extension module to build
             'spkmeans',
             # the files to compile into our module relative to ``setup.py``
-            ['spkmeansmodule.c','spkmeans.c'], 
+            ['spkmeans.c'], #TODO: add here spkmeansmodule.c
         ),
     ]
 )

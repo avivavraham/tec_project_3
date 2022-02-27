@@ -73,7 +73,7 @@ static PyObject* kmeans(PyObject *self, PyObject *args){
     convertPython2DArray(py_centroids,centroids,k,d);
     convertPython2DArray(py_data_points,data_points,num_rows,d);
 
-    algorithm();
+    algorithm(); //TODO: add parameters
 
     result = createPyObjectFrom2DArray(centroids,k,d);
 

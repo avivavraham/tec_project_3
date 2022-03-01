@@ -124,7 +124,55 @@ double **degree_matrix_normalized(double ** degree_matrix){
     return degree_matrix;
 }
 
-/* TODO: L matrix & matrix multiplication.
- *
- *
+/*
+ * this function multiply matrix1 by matrix2 and return the product matrix.
+ * assumption: the dimensions for the multiplication are valid,there for,column1_size = row2_size.
 */
+double **matrix_multiplication(double ** matrix1, int row1_size, int column1_size,
+                               double ** matrix2, int row2_size, int column2_size){
+    double ** product = allocate_array_2d(row1_size,column2_size);
+    for (int i = 0; i < row1_size; ++i) {
+        for (int j = 0; j < column2_size; ++j) {
+            double sum = 0;
+            for (int k = 0; k < column1_size; ++k) {
+                sum += matrix1[i][k] * matrix2[k][j];
+            }
+            product[i][j] = sum;
+        }
+    }
+    return product;
+}
+
+/*
+ * this function subtract matrix1 by matrix2 and return the product matrix.
+ * assumption: the dimensions for the subtraction are valid,
+ * there for,row_size for matrix 1 = row_size for matrix 2. and so for columns sizes.
+*/
+double **matrix_subtraction(double ** matrix1, double ** matrix2, int row_size, int column_size){
+    double ** product = allocate_array_2d(row_size,column_size);
+    for (int i = 0; i < row_size; ++i) {
+        for (int j = 0; j < column_size; ++j) {
+            product[i][j] = matrix1[i][j] - matrix2[i][j];
+        }
+    }
+    return product;
+}
+
+/*
+ * TODO: finish
+*/
+double **lnorm_matrix(double ** weight_matrix, double ** diagonal_matrix, int row_size, int column_size){
+    double ** product = allocate_array_2d(row_size,column_size);
+    for (int i = 0; i < row_size; ++i) {
+        product[i][i] = 1; //turning the product matrix to the unit matrix,I.
+    }
+    degree_matrix_normalized(diagonal_matrix);
+    product = matrix_subtraction(product,matrix_multiplication(matrix_multiplication(
+                                                                       diagonal_matrix,row_size,column_size,
+                                                                       weight_matrix,row_size,column_size),
+                                                               row_size,column_size,
+                                                               diagonal_matrix,row_size,
+                                                               column_size),row_size,column_size);
+    // product = I - (D^-0.5)*W*D(^-0.5)
+    return product;
+}

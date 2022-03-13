@@ -32,7 +32,7 @@ double** weighted_matrix(double** data_points_array, int num_rows){
                 weighted_matrix[i][j] = weighted_matrix[j][i];
             }
             if(i < j){
-                weighted_matrix[i][j] = weight(data_points_array[i],data_points_array[j]);
+                weighted_matrix[i][j] = weight(data_points_array[i],data_points_array[j],num_rows);
             }
         }
     }

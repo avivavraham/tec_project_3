@@ -20,8 +20,7 @@
  the function returns the W matrix
 */
 
-double** weighted_matrix(double** data_points_array, int num_rows){
-    double** weighted_matrix = allocate_array_2d(num_rows, num_rows);
+void calculate_weighted_matrix(double ** weighted_matrix, double** data_points_array, int num_rows, int d){
     int i,j;
     for (i = 0; i < num_rows; ++i) {
         for (j = 0; j < num_rows; ++j) {
@@ -32,11 +31,10 @@ double** weighted_matrix(double** data_points_array, int num_rows){
                 weighted_matrix[i][j] = weighted_matrix[j][i];
             }
             if(i < j){
-                weighted_matrix[i][j] = weight(data_points_array[i],data_points_array[j],num_rows);
+                weighted_matrix[i][j] = calculate_weight(data_points_array[i],data_points_array[j],d);
             }
         }
     }
-    return weighted_matrix;
 }
 
 /*
@@ -46,7 +44,7 @@ double** weighted_matrix(double** data_points_array, int num_rows){
   l_norm||dt1,dt2|| = sqrt_root(sum_i((dt1[i] - dt2[i])^2))
 */
 
-double weight(double* data_point_1, double* data_point_2,int d){
+double calculate_weight(const double* data_point_1, const double* data_point_2,int d){
     double sum = 0;
     int i;
     for(i=0; i < d; i++){
@@ -65,17 +63,15 @@ dij =
         sum(Wiz)z=1 until z=n, if i = j
         0, otherwise
 */
-double **degree_matrix(double ** weighted_matrix, int N){
-    double** degree_matrix = allocate_array_2d(N, N);
+void **calculate_degree_matrix(double **degree_matrix, double ** weighted_matrix, int N){
     for (int i = 0; i < N; ++i) {
         degree_matrix[i][i] = sum_of_row(weighted_matrix[i],N);
     }
-    return degree_matrix;
 }
 /*
  * returns the sum of values in a given row vector
 */
-double sum_of_row(double *row_vector, int len){
+double sum_of_row(const double *row_vector, int len){
     double sum=0;
     for (int i = 0; i < len; ++i) {
         sum += row_vector[i];
@@ -162,9 +158,9 @@ double **matrix_subtraction(double ** matrix1, double ** matrix2, int row_size, 
 }
 
 /*
- * TODO: finish
+ * TODO: finish, where is the diagonal degree Matrix? need to create function for calculating it
 */
-double **lnorm_matrix(double ** weight_matrix, double ** diagonal_matrix, int row_size, int column_size){
+double **calculate_lnorm_matrix(double **lnorm_matrix,double** weight_matrix, double ** diagonal_matrix, int row_size, int column_size){
     double ** product = allocate_array_2d(row_size,column_size);
     for (int i = 0; i < row_size; ++i) {
         product[i][i] = 1; //turning the product matrix to the unit matrix,I.

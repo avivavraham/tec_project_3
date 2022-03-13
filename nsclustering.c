@@ -20,10 +20,11 @@
  the function returns the W matrix
 */
 
-double** weighted_matrix(double** data_points_array){
+double** weighted_matrix(double** data_points_array, int num_rows){
     double** weighted_matrix = allocate_array_2d(num_rows, num_rows);
-    for (int i = 0; i < num_rows; ++i) {
-        for (int j = 0; j < num_rows; ++j) {
+    int i,j;
+    for (i = 0; i < num_rows; ++i) {
+        for (j = 0; j < num_rows; ++j) {
             if(i==j){
                 weighted_matrix[i][j] = 0;
             }
@@ -45,9 +46,10 @@ double** weighted_matrix(double** data_points_array){
   l_norm||dt1,dt2|| = sqrt_root(sum_i((dt1[i] - dt2[i])^2))
 */
 
-double weight(double* data_point_1, double* data_point_2){
+double weight(double* data_point_1, double* data_point_2,int d){
     double sum = 0;
-    for(int i=0; i < d; i++){
+    int i;
+    for(i=0; i < d; i++){
         double sub = data_point_1[i] - data_point_2[i];
         sum += pow(sub,2);
     }
@@ -63,19 +65,19 @@ dij =
         sum(Wiz)z=1 until z=n, if i = j
         0, otherwise
 */
-double **degree_matrix(double ** weighted_matrix){
-    double** degree_matrix = allocate_array_2d(num_rows, num_rows);
-    for (int i = 0; i < num_rows; ++i) {
-        degree_matrix[i][i] = sum_of_row(weighted_matrix[i]);
+double **degree_matrix(double ** weighted_matrix, int N){
+    double** degree_matrix = allocate_array_2d(N, N);
+    for (int i = 0; i < N; ++i) {
+        degree_matrix[i][i] = sum_of_row(weighted_matrix[i],N);
     }
     return degree_matrix;
 }
 /*
  * returns the sum of values in a given row vector
 */
-double sum_of_row(double *row_vector){
+double sum_of_row(double *row_vector, int len){
     double sum=0;
-    for (int i = 0; i < num_rows; ++i) {
+    for (int i = 0; i < len; ++i) {
         sum += row_vector[i];
     }
     return sum;
@@ -84,10 +86,11 @@ double sum_of_row(double *row_vector){
  * prints the values of a given matrix
 */
 void print_matrix(double **matrix, int size_row, int size_column){
+    int i,j;
     printf("[");
-    for (int i = 0; i < size_row ; ++i) {
+    for (i = 0; i < size_row ; ++i) {
         printf("[");
-        for (int j = 0; j < size_column; ++j) {
+        for (j = 0; j < size_column; ++j) {
             printf("%f", matrix[i][j]);
             if (j != size_column-1){printf(",");}
         }
@@ -119,7 +122,7 @@ void **pow_matrix(double ** matrix,int size_row, int size_column , double pow_, 
 /*
  * this function return the D matrix normalized by the power of -1/2.
 */
-double **degree_matrix_normalized(double ** degree_matrix){
+double **degree_matrix_normalized(double ** degree_matrix, int num_rows){
     pow_matrix(degree_matrix,num_rows,num_rows,-0.5,1);
     return degree_matrix;
 }
@@ -166,7 +169,7 @@ double **lnorm_matrix(double ** weight_matrix, double ** diagonal_matrix, int ro
     for (int i = 0; i < row_size; ++i) {
         product[i][i] = 1; //turning the product matrix to the unit matrix,I.
     }
-    degree_matrix_normalized(diagonal_matrix);
+    degree_matrix_normalized(diagonal_matrix, row_size);
     product = matrix_subtraction(product,matrix_multiplication(matrix_multiplication(
                                                                        diagonal_matrix,row_size,column_size,
                                                                        weight_matrix,row_size,column_size),

@@ -162,6 +162,12 @@ void calculate_diagonal_degree_matrix(double **matrix, double** weight_matrix,in
     degree_matrix_normalized(matrix,len); //returns D^-(0.5)
 }
 
+void set_matrix_to_Identity(double ** matrix, int n){
+    for (int i = 0; i < n; ++i) {
+        matrix[i][i] = 1;
+    }
+}
+
 /*
  * TODO: finish,
 */
@@ -169,11 +175,8 @@ void calculate_lnorm_matrix(double **lnorm_matrix,double** weight_matrix, double
     double **Identity_matrix = allocate_array_2d(n,n);
     double **result1 = allocate_array_2d(n,n);
     double **result2 = allocate_array_2d(n,n);
-    error_occurred(Identity_matrix == NULL);
-    error_occurred(result1 == NULL);
-    for (int i = 0; i < n; ++i) {
-        Identity_matrix[i][i] = 1;
-    }
+    set_matrix_to_Identity(Identity_matrix,n);
+
 
     // Calculate W x D(^-0.5)
     matrix_multiplication(weight_matrix,n,n,diagonal_matrix,n,n,result1);
@@ -219,10 +222,10 @@ int calculate_eigengap_heuristic(double **eigenvalues,int n){
 
 /*
  * this function sets the i,j for them:
- * max{|A_ij|} for any j>i
+ * max{|A_ij|} for any j>i (1.2.1.3)
  */
 
-Point find_Jacobi_ij(double ** matrix,int n) {
+Point Jacobi_find_ij(double ** matrix,int n) {
     int i,j;
     double max=0, num;
     Point p;
@@ -240,6 +243,10 @@ Point find_Jacobi_ij(double ** matrix,int n) {
     return p;
 }
 
+/*
+ * this function gets the difference between A and A' (1.2.1.5)
+ */
+
 double Jacobi_find_diff_off(double **A,double **A_new, int n){
     double sum_A=0,sum_A_new=0;
     int i,j;
@@ -256,7 +263,12 @@ double Jacobi_find_diff_off(double **A,double **A_new, int n){
     return sum_A - sum_A_new;
 }
 
-int get_sign(double num){
+/*
+ * retrieves the sign of the number
+ * returns 1 if num >= 0 or -1 if negative
+ */
+
+int Jacobi_get_sign(double num){
     if(num<0){
         return -1;
     } else{
@@ -264,7 +276,11 @@ int get_sign(double num){
     }
 }
 
-void set_matrix_A_new(double **A_new, double ** A,int n,int i,int j,double c,double s){
+/*
+ * sets the matrix A' according to the rules specified in section 1.2.1.6
+ */
+
+void Jacobi_set_matrix_A_new(double **A_new, double ** A,int n,int i,int j,double c,double s){
     int row,column;
 
     for(row=0;row<n;row++){
@@ -281,6 +297,18 @@ void set_matrix_A_new(double **A_new, double ** A,int n,int i,int j,double c,dou
     A_new[i][j] = 0;
 }
 
+void Jacobi_set_matrix_P(double **matrix, int n, int i,int j, double c, double s){
+    set_matrix_to_Identity(matrix,n);
+    matrix[i][i] = c;
+    matrix[j][j] = c;
+    matrix[i][j] = s;
+    matrix[j][i] = -s;
+}
+
+/*
+ * this function runs the Jacobi_algorithm
+ */
+
 void Jacobi_algorithm(double **laplacian, int n){
     double diff,theta,t,c,s;
     double epsilon = pow(10,-5);
@@ -291,13 +319,17 @@ void Jacobi_algorithm(double **laplacian, int n){
     double ** A = allocate_array_2d(n,n);
     double ** A_new = allocate_array_2d(n,n);
     double ** P_matrix = allocate_array_2d(n,n);
+    double ** result = allocate_array_2d(n,n);
     set_equal_array_2d(A,laplacian,n,n);
     set_equal_array_2d(A_new,laplacian,n,n);
+
+    set_matrix_to_Identity(V,n);
 
 
 
     while( num_iter > 0 && diff < epsilon){
-        p = find_Jacobi_ij(A,n);
+        p = Jacobi_find_ij(A,n); // 1.2.1.3
+        //1.2.1.4
         i = p.i;
         j = p.j;
         theta = (A[j][j] - A[i][i]) / (2 * A[i][j]);
@@ -305,12 +337,25 @@ void Jacobi_algorithm(double **laplacian, int n){
         c = 1 / (sqrt(pow(t,2)) + 1 );
         s = t * c;
 
+        zero_array_2d(P_matrix,n,n);
+        zero_array_2d(result,n,n);
 
+        Jacobi_set_matrix_P(P_matrix,n,i,j,c,s); // 1.2.1.2
+        matrix_multiplication(V,n,n,P_matrix,n,n,result); // 1.2.1.1.e
+        set_equal_array_2d(V,result,n,n);
 
-        set_matrix_A_new(A_new,A,n,i,j,c,s);
+        Jacobi_set_matrix_A_new(A_new,A,n,i,j,c,s);
 
-
-        diff = Jacobi_find_diff_off(A,A_new,n);
+        diff = Jacobi_find_diff_off(A,A_new,n); // 1.2.1.5
         num_iter--;
+
+        set_equal_array_2d(A,A_new,n,n);
     }
+
+    free_array_2d(V,n);
+    free_array_2d(A,n);
+    free_array_2d(A_new,n);
+    free_array_2d(P_matrix,n);
+    free_array_2d(result,n);
+
 }

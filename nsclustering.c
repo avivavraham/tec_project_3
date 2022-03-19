@@ -191,34 +191,6 @@ void calculate_lnorm_matrix(double **lnorm_matrix,double** weight_matrix, double
     free_array_2d(result1,n);
     free_array_2d(result2,n);
 }
-/*
- * the function gets *sorted* eigenvalues array (1.3)
- */
-
-int calculate_eigengap_heuristic(double **eigenvalues,int n){
-    int i,j;
-    int max=0,argmax=0;
-    double **eigengap = allocate_array_2d(n,n);
-    error_occurred(eigengap == NULL);
-
-    for(i=0;i<n-1;i++){ //TODO: verify this calculation
-        for(j=0;j<n;j++ ){
-            eigengap[i] = eigenvalues[i+1] - eigenvalues[i];
-        }
-    }
-
-    for(i=0;i < floor(n/2);i++){
-        if(eigengap[i] > max){
-            max = eigengap[i];
-            argmax = i;
-        }
-    }
-
-    free_array_2d(eigengap,n);
-    return argmax;
-}
-
-
 
 /*
  * this function sets the i,j for them:
@@ -305,11 +277,38 @@ void Jacobi_set_matrix_P(double **matrix, int n, int i,int j, double c, double s
     matrix[j][i] = -s;
 }
 
+void init_Eigen_struct(Eigen *eigen, int n){
+    int i=0;
+    for(i=0;i<n;i++){
+        eigen[i].vector = calloc(n, sizeof(double *));
+    }
+}
+
+void free_Eigen_struct(Eigen *eigen, int n){
+    int i=0;
+    for(i=0;i<n;i++){
+        free(eigen[i].vector);
+    }
+}
+
 /*
- * this function runs the Jacobi_algorithm
+ * this function sets the eigenvalues and eigenvectors
+ * the vectors matrix is the V matrix when each column is eigenvector
+ * the values matrix is the A matrix when each A[i][i] is eigenvalue
  */
 
-void Jacobi_algorithm(double **laplacian, int n){
+void Jacobi_set_Eigen(Eigen *eigen, int n, double **vectors, double **values){
+    int i,j;
+    for(j=0;j<n;j++){
+        eigen[j].value = values[j][j];
+        for(i=0;i<n;i++){
+            eigen[j].vector[i] = vectors[i][j]; // transfer the column in vectors to row
+        }
+    }
+}
+
+//TODO: need to return matrix A or A_new
+void Jacobi_algorithm(double **laplacian, int n, Eigen *eigen){
     double diff,theta,t,c,s;
     double epsilon = pow(10,-5);
     int i,j;
@@ -325,9 +324,7 @@ void Jacobi_algorithm(double **laplacian, int n){
 
     set_matrix_to_Identity(V,n);
 
-
-
-    while( num_iter > 0 && diff < epsilon){
+    while(num_iter > 0 && diff >= epsilon){
         p = Jacobi_find_ij(A,n); // 1.2.1.3
         //1.2.1.4
         i = p.i;
@@ -352,10 +349,36 @@ void Jacobi_algorithm(double **laplacian, int n){
         set_equal_array_2d(A,A_new,n,n);
     }
 
+    Jacobi_set_Eigen(eigen,n,V,A);
+
     free_array_2d(V,n);
-    free_array_2d(A,n);
+//    free_array_2d(A,n);
     free_array_2d(A_new,n);
     free_array_2d(P_matrix,n);
     free_array_2d(result,n);
+}
 
+/*
+ * the function gets *sorted* eigenvalues array (1.3)
+ */
+
+int calculate_eigengap_heuristic(Eigen *eigens ,int n){
+    int i,argmax;
+    double max=0;
+    double *eigengap = calloc(n, sizeof(double *));;
+
+    for(i=0;i<n-1;i++){ //TODO: verify this calculation
+        eigengap[i] = eigens[i+1].value - eigens[i].value;
+    }
+
+    for(i=0;i < n/2;i++){
+        if(eigengap[i] > max){
+            max = eigengap[i];
+            argmax = i;
+        }
+    }
+
+    free(eigengap);
+    //TODO: verify this
+    return argmax + 1; // because according to the presentation we calculate the eigenvalues from 1 to n
 }

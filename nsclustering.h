@@ -11,6 +11,12 @@ typedef struct
     int j;
 } Point;
 
+typedef struct
+{
+    double value;
+    double *vector;
+} Eigen;
+
 #include "libraries.h"
 #include "spkmeans.h"
 
@@ -31,6 +37,11 @@ int get_sign(double num);
 double Jacobi_find_diff_off(double **A,double **A_new, int n);
 void Jacobi_set_matrix_A_new(double **A_new, double ** A,int n,int i,int j,double c,double s);
 void Jacobi_set_matrix_P(double **matrix, int n, int i,int j, double c, double s);
+void Jacobi_algorithm(double **laplacian, int n, Eigen *eigen);
+int calculate_eigengap_heuristic(Eigen *eigens ,int n);
+void init_Eigen_struct(Eigen *eigen, int n);
+void free_Eigen_struct(Eigen *eigen, int n);
+void Jacobi_set_Eigen(Eigen *eigen, int n, double **vectors, double **values);
 
 
 #endif //TEC_PROJECT_3_NSCLUSTERING_H

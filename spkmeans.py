@@ -111,8 +111,6 @@ if __name__ == '__main__':
         elif goal == "jacobi":
             matrix = sp.jacobi()
 
-
-
     except Exception:
         print('An Error Has Occurred')
         exit(1)

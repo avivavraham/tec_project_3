@@ -3,7 +3,7 @@
 
 int main(int argc, char **argv) {
 
-    int *k,*d,*num_rows;
+    int *d,*num_rows;
     char *input_file, *goal;
     double **data_points;
 
@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
 
     //TODO: initialize k
 
-    init_data_frame(k,d,num_rows,input_file,data_points);
+    init_data_frame(d,num_rows,input_file,data_points);
 
     if (strcmp(goal, "wam") == 0){ //input datapoins
         double** weighted_matrix = allocate_array_2d(*num_rows, *num_rows);
@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
         calculate_degree_matrix(diagonal_degree_matrix,weighted_matrix,*num_rows); //TODO: is this diagonal?
 
         double** lnorm_matrix = allocate_array_2d(*num_rows, *num_rows);
-        lnorm_matrix = calculate_lnorm_matrix(lnorm_matrix,weighted_matrix);
+        calculate_lnorm_matrix(lnorm_matrix,weighted_matrix,diagonal_degree_matrix,*num_rows);
         print_matrix(lnorm_matrix, *num_rows, *num_rows);
         free_array_2d(lnorm_matrix, *num_rows);
 
@@ -47,12 +47,16 @@ int main(int argc, char **argv) {
         free_array_2d(weighted_matrix, *num_rows);
 
     }
-    else if (strcmp(goal, "jacobi") == 0){ //input symmetric matrix
+    else if (strcmp(goal, "jacobi") == 0){ //input symmetric matrix, what is the output?
+
+
 
 
     } else{
         input_valid(0);
     }
+
+    free_array_2d(data_points,*num_rows);
 
     return 0;
 }
@@ -92,7 +96,7 @@ int find_d_of_vector(FILE *fp) {
     return d;
 }
 
-void init_data_frame(const int *k,const int *d,const int *num_rows, char *input_file,double **data_points) {
+void init_data_frame(const int *d,const int *num_rows, char *input_file,double **data_points) {
     FILE *ifp = NULL;
     int i = 0, j;
     char line[1024];
@@ -103,12 +107,10 @@ void init_data_frame(const int *k,const int *d,const int *num_rows, char *input_
 
     local_num_rows = find_vectors_len(ifp);
     num_rows = &local_num_rows;
-    input_valid(*k < *num_rows);
     local_d = find_d_of_vector(ifp);
     d = &local_d;
 
     data_points = allocate_array_2d(*num_rows, *d);
-    error_occurred(data_points == NULL);
 
     while (fgets(line, sizeof line, ifp) != NULL) {
         line[strlen(line) - 1] = '\0';

@@ -62,7 +62,7 @@ dij =
         sum(Wiz)z=1 until z=n, if i = j
         0, otherwise
 */
-void **calculate_degree_matrix(double **degree_matrix, double ** weighted_matrix, int N){
+void calculate_degree_matrix(double **degree_matrix, double ** weighted_matrix, int N){
     for (int i = 0; i < N; ++i) {
         degree_matrix[i][i] = sum_of_row(weighted_matrix[i],N);
     }
@@ -100,7 +100,7 @@ void print_matrix(double **matrix, int size_row, int size_column){
  * optional: if diag_pow_optional = 1(true), only the element on the diagonal
  * of the matrix are raised by the given power.
 */
-void **pow_matrix(double ** matrix,int size_row, int size_column , double pow_, int diag_pow_optional){
+void pow_matrix(double ** matrix,int size_row, int size_column , double pow_, int diag_pow_optional){
     if(diag_pow_optional){
         for (int i = 0; i < size_row; ++i) {
             matrix[i][i] = pow(matrix[i][i],pow_);

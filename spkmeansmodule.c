@@ -1,7 +1,8 @@
 #define PY_SSIZE_T_CLEAN
-#include <Python.h> //for linux
+#include "Python.h"
+#include <Python/Python.h> //for linux
 #include "spkmeans.h"
-#include "spkmeans.c"
+#include "spkmeans.h"
 
 /*
 we get PyObject that represents 2 dimensional array and we convert it

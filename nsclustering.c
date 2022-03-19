@@ -3,11 +3,6 @@
 //
 
 #include "nsclustering.h"
-#include "spkmeans.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <math.h>
 
 /*
  NEW CODE
@@ -174,4 +169,102 @@ double **calculate_lnorm_matrix(double **lnorm_matrix,double** weight_matrix, do
                                                                column_size),row_size,column_size);
     // product = I - (D^-0.5)*W*D(^-0.5)
     return product;
+}
+
+/*
+ * this function sets the i,j for them:
+ * max{|A_ij|} for any j>i
+ */
+
+Point find_Jacobi_ij(double ** matrix,int n) {
+    int i,j;
+    double max=0, num;
+    Point p;
+
+    for(i=0;i<n;i++){
+        for(j=i+1;j<n;j++){
+            num = matrix[i][j];
+            if (num > max){
+                max = num;
+                p.i = i;
+                p.j = j;
+            }
+        }
+    }
+    return p;
+}
+
+double Jacobi_find_diff_off(double **A,double **A_new, int n){
+    double sum_A=0,sum_A_new=0;
+    int i,j;
+    for(i=0;i<n;i++){
+        for(j=0;j<n;j++){
+            if(i == j){
+                continue;
+            }
+            sum_A += pow(A[i][j],2);
+            sum_A_new += pow(A_new[i][j],2);
+        }
+    }
+
+    return sum_A - sum_A_new;
+}
+
+int get_sign(double num){
+    if(num<0){
+        return -1;
+    } else{
+        return 1;
+    }
+}
+
+void set_matrix_A_new(double **A_new, double ** A,int n,int i,int j,double c,double s){
+    int row,column;
+
+    for(row=0;row<n;row++){
+        for(column=0;column<n;column++){
+            if(row != i && row != j){
+                A_new[row][i] = c * A[row][i] - s * A[row][j];
+                A_new[row][j] = c * A[row][j] + s * A[row][i];
+            }
+        }
+    }
+
+    A_new[i][i] = pow(c,2) * A[i][i] + pow(s,2) * A[j][j] - 2 * s * c * A[i][j];
+    A_new[j][j] = pow(s,2) * A[i][i] + pow(c,2) * A[j][j] + 2 * s * c * A[i][j];
+    A_new[i][j] = 0;
+}
+
+void Jacobi_algorithm(double **laplacian, int n){
+    double diff,theta,t,c,s;
+    double epsilon = pow(10,-5);
+    int i,j;
+    int num_iter=100;
+    Point p;
+    double ** V = allocate_array_2d(n,n);
+    double ** A = allocate_array_2d(n,n);
+    double ** A_new = allocate_array_2d(n,n);
+    double ** P_matrix = allocate_array_2d(n,n);
+    set_equal_array_2d(A,laplacian,n,n);
+    set_equal_array_2d(A_new,laplacian,n,n);
+
+
+
+    while( num_iter > 0 && diff < epsilon){
+        p = find_Jacobi_ij(A,n);
+        i = p.i;
+        j = p.j;
+        theta = (A[j][j] - A[i][i]) / (2 * A[i][j]);
+        t = get_sign(theta) / (fabs(theta) + sqrt(pow(theta,2) + 1 ));
+        c = 1 / (sqrt(pow(t,2)) + 1 );
+        s = t * c;
+
+
+
+        set_matrix_A_new(A_new,A,n,i,j,c,s);
+
+
+        diff = Jacobi_find_diff_off(A,A_new,n);
+        num_iter--;
+    }
 }

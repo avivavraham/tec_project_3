@@ -5,10 +5,9 @@
 #ifndef TEC_PROJECT_3_MAIN_H
 #define TEC_PROJECT_3_MAIN_H
 
-#include <stdio.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "libraries.h"
+#include <spkmeans.h>
+#include "nsclustering.h"
 
 void input_valid(int condition);
 int find_vectors_len(FILE *fp);

@@ -103,6 +103,7 @@ static PyMethodDef capiMethods[] = {
         {"ddg",(PyCFunction) ddg,METH_VARARGS,PyDoc_STR("Calculate and output the Diagonal Degree Matrix ")},
         {"lnorm",(PyCFunction) lnorm,METH_VARARGS,PyDoc_STR("Calculate and output the Normalized Graph Laplacian")},
         {"jacobi",(PyCFunction) jacobi,METH_VARARGS,PyDoc_STR("Calculate and output the eigenvalues and eigenvectors")},
+        {NULL, NULL, 0, NULL}
 };
 
 

@@ -10,14 +10,18 @@
 #include <math.h>
 
 /*
- NEW CODE
+    1.1.1 - calculate_weighted_matrix
+    1.1.2 - calculate_diagonal_degree_matrix
+    1.1.3 -
+    1.2 -
+    1.3 - calculate_eigengap_heuristic
 */
 
 /*
  this function takes the data points matrix and creates the weighted matrix W[nXn]
  that represent the weight between every two data points
  while n represent the amount of data points received
- the function returns the W matrix
+ the function returns the W matrix (1.1.1)
 */
 
 void calculate_weighted_matrix(double ** weighted_matrix, double** data_points_array, int num_rows, int d){
@@ -127,19 +131,17 @@ double **degree_matrix_normalized(double ** degree_matrix, int num_rows){
  * this function multiply matrix1 by matrix2 and return the product matrix.
  * assumption: the dimensions for the multiplication are valid,there for,column1_size = row2_size.
 */
-double **matrix_multiplication(double ** matrix1, int row1_size, int column1_size,
-                               double ** matrix2, int row2_size, int column2_size){
-    double ** product = allocate_array_2d(row1_size,column2_size);
+void matrix_multiplication(double ** matrix1, int row1_size, int column1_size,
+                               double ** matrix2, int row2_size, int column2_size, double **result){
     for (int i = 0; i < row1_size; ++i) {
         for (int j = 0; j < column2_size; ++j) {
             double sum = 0;
             for (int k = 0; k < column1_size; ++k) {
                 sum += matrix1[i][k] * matrix2[k][j];
             }
-            product[i][j] = sum;
+            result[i][j] = sum;
         }
     }
-    return product;
 }
 
 /*
@@ -147,31 +149,75 @@ double **matrix_multiplication(double ** matrix1, int row1_size, int column1_siz
  * assumption: the dimensions for the subtraction are valid,
  * there for,row_size for matrix 1 = row_size for matrix 2. and so for columns sizes.
 */
-double **matrix_subtraction(double ** matrix1, double ** matrix2, int row_size, int column_size){
-    double ** product = allocate_array_2d(row_size,column_size);
+void matrix_subtraction(double ** matrix1, double ** matrix2, int row_size, int column_size, double **result){
     for (int i = 0; i < row_size; ++i) {
         for (int j = 0; j < column_size; ++j) {
-            product[i][j] = matrix1[i][j] - matrix2[i][j];
+            result[i][j] = matrix1[i][j] - matrix2[i][j];
         }
     }
-    return product;
 }
 
 /*
- * TODO: finish, where is the diagonal degree Matrix? need to create function for calculating it
-*/
-double **calculate_lnorm_matrix(double **lnorm_matrix,double** weight_matrix, double ** diagonal_matrix, int row_size, int column_size){
-    double ** product = allocate_array_2d(row_size,column_size);
-    for (int i = 0; i < row_size; ++i) {
-        product[i][i] = 1; //turning the product matrix to the unit matrix,I.
-    }
-    degree_matrix_normalized(diagonal_matrix, row_size);
-    product = matrix_subtraction(product,matrix_multiplication(matrix_multiplication(
-                                                                       diagonal_matrix,row_size,column_size,
-                                                                       weight_matrix,row_size,column_size),
-                                                               row_size,column_size,
-                                                               diagonal_matrix,row_size,
-                                                               column_size),row_size,column_size);
-    // product = I - (D^-0.5)*W*D(^-0.5)
-    return product;
+ * this function calculates the Diagonal Degree Matrix (1.1.2)
+ *
+ */
+
+void calculate_diagonal_degree_matrix(double **matrix, double** weight_matrix,int len){
+    calculate_degree_matrix(matrix,weight_matrix,len);
+    degree_matrix_normalized(matrix,len); //returns D^-(0.5)
 }
+
+/*
+ * TODO: finish,
+*/
+void calculate_lnorm_matrix(double **lnorm_matrix,double** weight_matrix, double **diagonal_matrix, int n){
+    double **Identity_matrix = allocate_array_2d(n,n);
+    double **result1 = allocate_array_2d(n,n);
+    double **result2 = allocate_array_2d(n,n);
+    error_occurred(Identity_matrix == NULL);
+    error_occurred(result1 == NULL);
+    for (int i = 0; i < n; ++i) {
+        Identity_matrix[i][i] = 1;
+    }
+
+    // Calculate W x D(^-0.5)
+    matrix_multiplication(weight_matrix,n,n,diagonal_matrix,n,n,result1);
+
+    // Calculate (D^-0.5)*W*D(^-0.5)
+    matrix_multiplication(diagonal_matrix,n,n,result1,n,n,result2);
+
+    // Calculate lnorm_matrix = I - (D^-0.5)*W*D(^-0.5)
+    matrix_subtraction(Identity_matrix,result2,n,n,lnorm_matrix);
+
+    free_array_2d(Identity_matrix,n);
+    free_array_2d(result1,n);
+    free_array_2d(result2,n);
+}
+/*
+ * the function gets *sorted* eigenvalues array (1.3)
+ */
+
+int calculate_eigengap_heuristic(double **eigenvalues,int n){
+    int i,j;
+    int max=0,argmax=0;
+    double **eigengap = allocate_array_2d(n,n);
+    error_occurred(eigengap == NULL);
+
+    for(i=0;i<n-1;i++){ //TODO: verify this calculation
+        for(j=0;j<n;j++ ){
+            eigengap[i] = eigenvalues[i+1] - eigenvalues[i];
+        }
+    }
+
+    for(i=0;i < floor(n/2);i++){
+        if(eigengap[i] > max){
+            max = eigengap[i];
+            argmax = i;
+        }
+    }
+
+    free_array_2d(eigengap,n);
+    return argmax;
+}
+
+

@@ -26,10 +26,6 @@ void matrix_multiplication(double ** matrix1, int row1_size, int column1_size,
                            double ** matrix2, int row2_size, int column2_size, double **result);
 void matrix_subtraction(double ** matrix1, double ** matrix2, int row_size, int column_size, double **result);
 void calculate_lnorm_matrix(double **lnorm_matrix,double** weight_matrix, double **diagonal_matrix, int n);
-double **matrix_multiplication(double ** matrix1, int row1_size, int column1_size,
-                               double ** matrix2, int row2_size, int column2_size);
-double **matrix_subtraction(double ** matrix1, double ** matrix2, int row_size, int column_size);
-double **calculate_lnorm_matrix(double **lnorm_matrix,double** weight_matrix, double ** diagonal_matrix, int row_size, int column_size);
 Point find_Jacobi_ij(double ** matrix,int n);
 int get_sign(double num);
 double Jacobi_find_diff_off(double **A,double **A_new, int n);

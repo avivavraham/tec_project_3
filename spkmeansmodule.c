@@ -1,6 +1,5 @@
 #define PY_SSIZE_T_CLEAN
 #include "Python.h"
-#include <Python/Python.h> //for linux
 #include "spkmeans.h"
 #include "spkmeans.h"
 
@@ -29,7 +28,7 @@ we get 2 dimensional array and num of rows and columns,
 we return 2 dimensional PyObject
 */
 
-PyObject* createPyObjectFrom2DArray(double **arr,int rows,int columns){
+PyObject* createPyObjectFrom2DArray(double **arr,int rows,int columns, int k){
     int i=0,j=0;
     PyObject *current,*result,*val;
 
@@ -59,6 +58,10 @@ We perceive the variables from the Python program, initialize the
 static PyObject* kmeans(PyObject *self, PyObject *args){
 
     PyObject *py_centroids,*py_data_points,*result;
+    int k, max_iter, num_rows, d = 1;
+    int *num_elements_in_cluster;
+    double **data_points, **centroids, **new_centroids, **clusters;
+    double epsilon;
 
     /* This parses the Python arguments into a double (d)  variable named z and int (i) variable named n*/
     if(!PyArg_ParseTuple(args, "iiiidOO", &k, &max_iter,&d,&num_rows,&epsilon,&py_centroids,&py_data_points)) {
@@ -76,9 +79,11 @@ static PyObject* kmeans(PyObject *self, PyObject *args){
 
     algorithm(); //TODO: add parameters
 
-    result = createPyObjectFrom2DArray(centroids,k,d);
+    result = createPyObjectFrom2DArray(centroids,num_rows,d,k);
 
     free_array_2d(centroids, k);
+    free_array_2d(data_points,num_rows);
+
 
     return result;
 }

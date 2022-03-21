@@ -1,8 +1,7 @@
 #define PY_SSIZE_T_CLEAN
 #include "Python.h"
 #include "spkmeans.h"
-#include "spkmeans.h"
-
+#include "nsclustering.h"
 /*
 we get PyObject that represents 2 dimensional array and we convert it
 to 2 dimensional double array (C object)
@@ -77,8 +76,6 @@ static PyObject* kmeans(PyObject *self, PyObject *args){
     convertPython2DArray(py_centroids,centroids,k,d);
     convertPython2DArray(py_data_points,data_points,num_rows,d);
 
-    algorithm(); //TODO: add parameters
-
     result = createPyObjectFrom2DArray(centroids,num_rows,d,k);
 
     free_array_2d(centroids, k);
@@ -87,6 +84,59 @@ static PyObject* kmeans(PyObject *self, PyObject *args){
 
     return result;
 }
+
+static PyObject* spk(PyObject *self, PyObject *args){
+
+    PyObject *py_data_points,*result;
+    double **data_points;
+    int num_rows,k,d;
+    Eigen * eigen;
+
+    if(!PyArg_ParseTuple(args, "iiiO", &k,&d,&num_rows,&py_data_points)) {
+        return NULL; /* In the CPython API, a NULL value is never valid for a
+                        PyObject* so it is used to signal that an error has occurred. */
+    }
+
+    data_points = allocate_array_2d(num_rows, d);
+    convertPython2DArray(py_data_points,data_points,k,d);
+
+    double** weighted_matrix = allocate_array_2d(num_rows, num_rows);
+    calculate_weighted_matrix(weighted_matrix,data_points,num_rows,d);
+    double** diagonal_degree_matrix = allocate_array_2d(num_rows, num_rows);
+    calculate_degree_matrix(diagonal_degree_matrix,weighted_matrix,num_rows); //TODO: is this diagonal?
+
+    double** lnorm_matrix = allocate_array_2d(num_rows, num_rows);
+    calculate_lnorm_matrix(lnorm_matrix,weighted_matrix,diagonal_degree_matrix,*num_rows);
+    print_matrix(lnorm_matrix, num_rows, num_rows);
+
+    eigen = calloc(num_rows, sizeof (Eigen *));
+    error_occurred(eigen == NULL);
+
+    init_Eigen_struct(eigen,num_rows);
+    Jacobi_algorithm(lnorm_matrix,num_rows,eigen);
+
+    if (k == 0){
+        k = calculate_eigengap_heuristic(eigen,num_rows);
+    }
+
+    double** U_matrix = allocate_array_2d(num_rows, k);
+    set_U_matrix(U_matrix,eigen,num_rows,k);
+
+    double** T_matrix = allocate_array_2d(num_rows, k);
+    calculate_T_matrix(T_matrix,U_matrix,num_rows,k);
+
+    result = createPyObjectFrom2DArray(data_points,num_rows,k,k);
+
+    free_array_2d(lnorm_matrix, num_rows);
+    free_array_2d(diagonal_degree_matrix,num_rows);
+    free_array_2d(weighted_matrix, num_rows);
+    free_Eigen_struct(eigen,num_rows);
+    free_array_2d(U_matrix,num_rows);
+    free_array_2d(T_matrix,num_rows);
+
+    return result;
+}
+
 
 /*
  * This array tells Python what methods this module has.

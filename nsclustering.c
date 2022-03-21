@@ -281,6 +281,7 @@ void init_Eigen_struct(Eigen *eigen, int n){
     int i=0;
     for(i=0;i<n;i++){
         eigen[i].vector = calloc(n, sizeof(double *));
+        error_occurred(eigen[i].vector == NULL);
     }
 }
 
@@ -307,7 +308,7 @@ void Jacobi_set_Eigen(Eigen *eigen, int n, double **vectors, double **values){
     }
 }
 
-//TODO: need to return matrix A or A_new
+//TODO: check if need to return matrix A or A_new
 void Jacobi_algorithm(double **laplacian, int n, Eigen *eigen){
     double diff,theta,t,c,s;
     double epsilon = pow(10,-5);
@@ -352,20 +353,41 @@ void Jacobi_algorithm(double **laplacian, int n, Eigen *eigen){
     Jacobi_set_Eigen(eigen,n,V,A);
 
     free_array_2d(V,n);
-//    free_array_2d(A,n);
+    free_array_2d(A,n);
     free_array_2d(A_new,n);
     free_array_2d(P_matrix,n);
     free_array_2d(result,n);
 }
 
+void sort_eigen(Eigen *eigen, int n){
+    int i,j;
+    Eigen temp;
+
+    for (i = 0; i < n; ++i)
+    {
+        for (j = i + 1; j < n; ++j)
+        {
+            if (eigen[i].value > eigen[j].value)
+            {
+                temp =  eigen[i];
+                eigen[i] = eigen[j];
+                eigen[j] = temp;
+            }
+        }
+    }
+}
 /*
- * the function gets *sorted* eigenvalues array (1.3)
+ * the function gets Eigen array (1.3)
+ * it calls the sort function and performs the heuristic
  */
 
 int calculate_eigengap_heuristic(Eigen *eigens ,int n){
     int i,argmax;
     double max=0;
     double *eigengap = calloc(n, sizeof(double *));;
+    error_occurred(eigengap == NULL);
+
+    sort_eigen(eigens,n);
 
     for(i=0;i<n-1;i++){ //TODO: verify this calculation
         eigengap[i] = eigens[i+1].value - eigens[i].value;
@@ -381,4 +403,41 @@ int calculate_eigengap_heuristic(Eigen *eigens ,int n){
     free(eigengap);
     //TODO: verify this
     return argmax + 1; // because according to the presentation we calculate the eigenvalues from 1 to n
+}
+
+//TODO: from here add the function to the header file
+
+/*
+ * U is a matrix nxk, and we set each of the first k eigenvectors to be a column in U matrix
+ */
+
+void set_U_matrix(double ** U,Eigen *eigen, int n, int k){
+    int i,j;
+
+    for (i = 0; i < k; ++i){
+        for (j = 0; j < n; ++j){
+            U[j][i] = eigen[i].vector[j];
+        }
+    }
+
+}
+
+double get_squared_sum_of_column(double ** matrix,int n, int c){
+    int i;
+    double sum=0;
+    for(i=0;i<n;i++){
+        sum += pow(matrix[i][c],2);
+    }
+    return sum;
+}
+
+void calculate_T_matrix(double ** T,double ** U,int n,int k){
+    int i,j;
+
+    for (i = 0; i < k; ++i){
+        for (j = 0; j < n; ++j){
+            T[i][j] = U[i][j] / pow(get_squared_sum_of_column(U,n,j),0.5);
+        }
+    }
+
 }

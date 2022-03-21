@@ -42,6 +42,7 @@ int calculate_eigengap_heuristic(Eigen *eigens ,int n);
 void init_Eigen_struct(Eigen *eigen, int n);
 void free_Eigen_struct(Eigen *eigen, int n);
 void Jacobi_set_Eigen(Eigen *eigen, int n, double **vectors, double **values);
+void sort_eigen(Eigen *eigen, int n);
 
 
 #endif //TEC_PROJECT_3_NSCLUSTERING_H

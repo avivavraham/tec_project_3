@@ -98,7 +98,7 @@ static PyObject* spk(PyObject *self, PyObject *args){
     }
 
     data_points = allocate_array_2d(num_rows, d);
-    convertPython2DArray(py_data_points,data_points,k,d);
+    convertPython2DArray(py_data_points,data_points,num_rows,d);
 
     double** weighted_matrix = allocate_array_2d(num_rows, num_rows);
     calculate_weighted_matrix(weighted_matrix,data_points,num_rows,d);
@@ -136,6 +136,119 @@ static PyObject* spk(PyObject *self, PyObject *args){
 
     return result;
 }
+
+static PyObject* wam(PyObject *self, PyObject *args) {
+
+    PyObject *py_data_points;
+    double **data_points;
+    int num_rows,d;
+
+    if(!PyArg_ParseTuple(args, "iiO", &d,&num_rows,&py_data_points)) {
+        return NULL; /* In the CPython API, a NULL value is never valid for a
+                        PyObject* so it is used to signal that an error has occurred. */
+    }
+
+    data_points = allocate_array_2d(num_rows, d);
+    convertPython2DArray(py_data_points,data_points,num_rows,d);
+
+    double** weighted_matrix = allocate_array_2d(num_rows, num_rows);
+    calculate_weighted_matrix(weighted_matrix,data_points,num_rows,d);
+
+    print_matrix(weighted_matrix,num_rows,num_rows);
+
+    free_array_2d(weighted_matrix,num_rows);
+    free_array_2d(data_points,num_rows);
+
+}
+
+static PyObject* ddg(PyObject *self, PyObject *args) {
+
+    PyObject *py_data_points;
+    double **data_points;
+    int num_rows,k,d;
+
+    if(!PyArg_ParseTuple(args, "iiiO", &k,&d,&num_rows,&py_data_points)) {
+        return NULL; /* In the CPython API, a NULL value is never valid for a
+                        PyObject* so it is used to signal that an error has occurred. */
+    }
+
+    data_points = allocate_array_2d(num_rows, d);
+    convertPython2DArray(py_data_points,data_points,num_rows,d);
+
+
+    double** weighted_matrix = allocate_array_2d(num_rows, num_rows);
+    calculate_weighted_matrix(weighted_matrix,data_points,num_rows,d);
+    double** diagonal_degree_matrix = allocate_array_2d(num_rows, num_rows);
+    calculate_degree_matrix(diagonal_degree_matrix,weighted_matrix,num_rows); //TODO: is this diagonal?
+
+    print_matrix(diagonal_degree_matrix,num_rows,num_rows);
+
+    free_array_2d(weighted_matrix,num_rows);
+    free_array_2d(diagonal_degree_matrix,num_rows);
+    free_array_2d(data_points,num_rows);
+
+}
+
+static PyObject* lnorm(PyObject *self, PyObject *args) {
+
+    PyObject *py_data_points,*result;
+    double **data_points;
+    int num_rows,k,d;
+
+    if(!PyArg_ParseTuple(args, "iiiO", &k,&d,&num_rows,&py_data_points)) {
+        return NULL; /* In the CPython API, a NULL value is never valid for a
+                        PyObject* so it is used to signal that an error has occurred. */
+    }
+
+    data_points = allocate_array_2d(num_rows, d);
+    convertPython2DArray(py_data_points,data_points,num_rows,d);
+
+
+    double** weighted_matrix = allocate_array_2d(num_rows, num_rows);
+    calculate_weighted_matrix(weighted_matrix,data_points,num_rows,d);
+    double** diagonal_degree_matrix = allocate_array_2d(num_rows, num_rows);
+    calculate_degree_matrix(diagonal_degree_matrix,weighted_matrix,num_rows); //TODO: is this diagonal?
+    double** lnorm_matrix = allocate_array_2d(num_rows, num_rows);
+    calculate_lnorm_matrix(lnorm_matrix,weighted_matrix,diagonal_degree_matrix,num_rows);
+
+    print_matrix(lnorm_matrix,num_rows,num_rows);
+
+    free_array_2d(weighted_matrix,num_rows);
+    free_array_2d(diagonal_degree_matrix,num_rows);
+    free_array_2d(lnorm_matrix,num_rows);
+    free_array_2d(data_points,num_rows);
+
+}
+
+static PyObject* jacobi(PyObject *self, PyObject *args) {
+
+    PyObject *py_symmetric_matrix,*result;
+    double **symmetric_matrix;
+    int n,k,d;
+    Eigen *eigen;
+
+    if(!PyArg_ParseTuple(args, "iiiO", &k, &d, &n, &py_symmetric_matrix)) {
+        return NULL; /* In the CPython API, a NULL value is never valid for a
+                        PyObject* so it is used to signal that an error has occurred. */
+    }
+
+    symmetric_matrix = allocate_array_2d(n, n);
+    convertPython2DArray(py_symmetric_matrix, symmetric_matrix, n, n);
+
+    eigen = calloc(n, sizeof (Eigen *));
+    error_occurred(eigen == NULL);
+
+    init_Eigen_struct(eigen,n);
+    Jacobi_algorithm(symmetric_matrix,n,eigen);
+
+    //TODO: print eigen
+
+    free_Eigen_struct(eigen,n);
+    free_array_2d(symmetric_matrix,n);
+
+}
+
+
 
 
 /*

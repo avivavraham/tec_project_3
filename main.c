@@ -3,9 +3,10 @@
 
 int main(int argc, char **argv) {
 
-    int *d,*num_rows;
+    int *d,*num_rows,i;
     char *input_file, *goal;
     double **data_points;
+    Eigen *eigen;
 
     input_valid(argc == 3);
     goal = argv[1];
@@ -26,7 +27,7 @@ int main(int argc, char **argv) {
         calculate_weighted_matrix(weighted_matrix,data_points,*num_rows,*d);
 
         double** diagonal_degree_matrix = allocate_array_2d(*num_rows, *num_rows);
-        calculate_degree_matrix(diagonal_degree_matrix,weighted_matrix,*num_rows); //TODO: is this diagonal?
+        calculate_diagonal_degree_matrix(diagonal_degree_matrix,weighted_matrix,*num_rows);
         print_matrix(diagonal_degree_matrix, *num_rows, *num_rows);
         free_array_2d(diagonal_degree_matrix,*num_rows);
 
@@ -36,7 +37,7 @@ int main(int argc, char **argv) {
         double** weighted_matrix = allocate_array_2d(*num_rows, *num_rows);
         calculate_weighted_matrix(weighted_matrix,data_points,*num_rows,*d);
         double** diagonal_degree_matrix = allocate_array_2d(*num_rows, *num_rows);
-        calculate_degree_matrix(diagonal_degree_matrix,weighted_matrix,*num_rows); //TODO: is this diagonal?
+        calculate_diagonal_degree_matrix(diagonal_degree_matrix,weighted_matrix,*num_rows);
 
         double** lnorm_matrix = allocate_array_2d(*num_rows, *num_rows);
         calculate_lnorm_matrix(lnorm_matrix,weighted_matrix,diagonal_degree_matrix,*num_rows);
@@ -49,10 +50,26 @@ int main(int argc, char **argv) {
     }
     else if (strcmp(goal, "jacobi") == 0){ //input symmetric matrix, what is the output?
 
+        input_valid(*num_rows == *d); //validates that this is squared matrix
+        eigen = calloc(*num_rows, sizeof (Eigen *));
+        error_occurred(eigen == NULL);
+        init_Eigen_struct(eigen,*num_rows);
+        Jacobi_algorithm(data_points,*num_rows,eigen);
 
+        for(i=0;i<*num_rows-1;i++){
+            printf("%f", eigen[i].value);
+            printf(",");
+        }
+        printf("%f\n", eigen[i].value);
 
+        double** eigenvectors = allocate_array_2d(*num_rows, *num_rows);
+        // U matrix takes the k first vectors as columns,
+        // so if we insert k=n we get matrix that each column of the n columns is eigenvector
+        set_U_matrix(eigenvectors,eigen,*num_rows,*num_rows);
+        print_matrix(eigenvectors,*num_rows,*num_rows);
 
     } else{
+        free_array_2d(data_points,*num_rows);
         input_valid(0);
     }
 

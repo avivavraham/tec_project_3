@@ -117,9 +117,8 @@ void pow_matrix(double ** matrix,int size_row, int size_column , double pow_, in
 /*
  * this function return the D matrix normalized by the power of -1/2.
 */
-double **degree_matrix_normalized(double ** degree_matrix, int num_rows){
+void **degree_matrix_normalized(double ** degree_matrix, int num_rows){
     pow_matrix(degree_matrix,num_rows,num_rows,-0.5,1);
-    return degree_matrix;
 }
 
 /*
@@ -169,7 +168,7 @@ void set_matrix_to_Identity(double ** matrix, int n){
 }
 
 /*
- * TODO: finish,
+ *
 */
 void calculate_lnorm_matrix(double **lnorm_matrix,double** weight_matrix, double **diagonal_matrix, int n){
     double **Identity_matrix = allocate_array_2d(n,n);
@@ -308,7 +307,6 @@ void Jacobi_set_Eigen(Eigen *eigen, int n, double **vectors, double **values){
     }
 }
 
-//TODO: check if need to return matrix A or A_new
 void Jacobi_algorithm(double **laplacian, int n, Eigen *eigen){
     double diff,theta,t,c,s;
     double epsilon = pow(10,-5);
@@ -405,8 +403,6 @@ int calculate_eigengap_heuristic(Eigen *eigens ,int n){
     return argmax + 1; // because according to the presentation we calculate the eigenvalues from 1 to n
 }
 
-//TODO: from here add the function to the header file
-
 /*
  * U is a matrix nxk, and we set each of the first k eigenvectors to be a column in U matrix
  */
@@ -422,6 +418,10 @@ void set_U_matrix(double ** U,Eigen *eigen, int n, int k){
 
 }
 
+/*
+ * the function return the squared sum of the column
+ */
+
 double get_squared_sum_of_column(double ** matrix,int n, int c){
     int i;
     double sum=0;
@@ -431,6 +431,10 @@ double get_squared_sum_of_column(double ** matrix,int n, int c){
     return sum;
 }
 
+/*
+ * the function takes the U matrix and creates from it T matrix
+ */
+
 void calculate_T_matrix(double ** T,double ** U,int n,int k){
     int i,j;
 
@@ -439,5 +443,4 @@ void calculate_T_matrix(double ** T,double ** U,int n,int k){
             T[i][j] = U[i][j] / pow(get_squared_sum_of_column(U,n,j),0.5);
         }
     }
-
 }

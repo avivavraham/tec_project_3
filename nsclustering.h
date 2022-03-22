@@ -27,7 +27,8 @@ double sum_of_row(const double *row_vector, int);
 void print_matrix(double **matrix, int size_row, int size_column);
 void set_matrix_to_Identity(double ** matrix, int n);
 void pow_matrix(double ** matrix,int size_row, int size_column , double pow_, int diag_pow_optional);
-double **degree_matrix_normalized(double ** degree_matrix, int);
+void **degree_matrix_normalized(double ** degree_matrix, int num_rows);
+void calculate_diagonal_degree_matrix(double **matrix, double** weight_matrix,int len);
 void matrix_multiplication(double ** matrix1, int row1_size, int column1_size,
                            double ** matrix2, int row2_size, int column2_size, double **result);
 void matrix_subtraction(double ** matrix1, double ** matrix2, int row_size, int column_size, double **result);
@@ -43,6 +44,9 @@ void init_Eigen_struct(Eigen *eigen, int n);
 void free_Eigen_struct(Eigen *eigen, int n);
 void Jacobi_set_Eigen(Eigen *eigen, int n, double **vectors, double **values);
 void sort_eigen(Eigen *eigen, int n);
+void set_U_matrix(double ** U,Eigen *eigen, int n, int k);
+double get_squared_sum_of_column(double ** matrix,int n, int c);
+void calculate_T_matrix(double ** T,double ** U,int n,int k);
 
 
 #endif //TEC_PROJECT_3_NSCLUSTERING_H

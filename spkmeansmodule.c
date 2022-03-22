@@ -103,7 +103,7 @@ static PyObject* spk(PyObject *self, PyObject *args){
     double** weighted_matrix = allocate_array_2d(num_rows, num_rows);
     calculate_weighted_matrix(weighted_matrix,data_points,num_rows,d);
     double** diagonal_degree_matrix = allocate_array_2d(num_rows, num_rows);
-    calculate_degree_matrix(diagonal_degree_matrix,weighted_matrix,num_rows); //TODO: is this diagonal?
+    calculate_diagonal_degree_matrix(diagonal_degree_matrix,weighted_matrix,num_rows);
 
     double** lnorm_matrix = allocate_array_2d(num_rows, num_rows);
     calculate_lnorm_matrix(lnorm_matrix,weighted_matrix,diagonal_degree_matrix,*num_rows);
@@ -179,7 +179,7 @@ static PyObject* ddg(PyObject *self, PyObject *args) {
     double** weighted_matrix = allocate_array_2d(num_rows, num_rows);
     calculate_weighted_matrix(weighted_matrix,data_points,num_rows,d);
     double** diagonal_degree_matrix = allocate_array_2d(num_rows, num_rows);
-    calculate_degree_matrix(diagonal_degree_matrix,weighted_matrix,num_rows); //TODO: is this diagonal?
+    calculate_diagonal_degree_matrix(diagonal_degree_matrix,weighted_matrix,num_rows);
 
     print_matrix(diagonal_degree_matrix,num_rows,num_rows);
 
@@ -207,7 +207,7 @@ static PyObject* lnorm(PyObject *self, PyObject *args) {
     double** weighted_matrix = allocate_array_2d(num_rows, num_rows);
     calculate_weighted_matrix(weighted_matrix,data_points,num_rows,d);
     double** diagonal_degree_matrix = allocate_array_2d(num_rows, num_rows);
-    calculate_degree_matrix(diagonal_degree_matrix,weighted_matrix,num_rows); //TODO: is this diagonal?
+    calculate_diagonal_degree_matrix(diagonal_degree_matrix,weighted_matrix,num_rows);
     double** lnorm_matrix = allocate_array_2d(num_rows, num_rows);
     calculate_lnorm_matrix(lnorm_matrix,weighted_matrix,diagonal_degree_matrix,num_rows);
 
@@ -250,7 +250,7 @@ static PyObject* jacobi(PyObject *self, PyObject *args) {
 
 
 
-
+//TODO: delete this
 /*
  * This array tells Python what methods this module has.
  * We will use it in the next structure

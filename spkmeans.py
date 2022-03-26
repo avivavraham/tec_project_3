@@ -111,7 +111,7 @@ if __name__ == '__main__':
 
         elif goal == "jacobi":
             #TODO: validate symmetric matrix
-            sp.jacobi(d,num_rows,data_points.tolist())
+            sp.jacobi(num_rows,data_points.tolist())
 
     except Exception:
         print('An Error Has Occurred')

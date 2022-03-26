@@ -177,7 +177,6 @@ static PyObject* ddg(PyObject *self, PyObject *args) {
     data_points = allocate_array_2d(num_rows, d);
     convertPython2DArray(py_data_points,data_points,num_rows,d);
 
-
     double** weighted_matrix = allocate_array_2d(num_rows, num_rows);
     calculate_weighted_matrix(weighted_matrix,data_points,num_rows,d);
     double** diagonal_degree_matrix = allocate_array_2d(num_rows, num_rows);
@@ -226,10 +225,10 @@ static PyObject* jacobi(PyObject *self, PyObject *args) {
 
     PyObject *py_symmetric_matrix,*result;
     double **symmetric_matrix;
-    int n,d;
+    int n,i;
     Eigen *eigen;
 
-    if(!PyArg_ParseTuple(args, "iiO" , &d, &n, &py_symmetric_matrix)) {
+    if(!PyArg_ParseTuple(args, "iiO" , &n, &py_symmetric_matrix)) {
         return NULL; /* In the CPython API, a NULL value is never valid for a
                         PyObject* so it is used to signal that an error has occurred. */
     }
@@ -243,11 +242,11 @@ static PyObject* jacobi(PyObject *self, PyObject *args) {
     init_Eigen_struct(eigen,n);
     Jacobi_algorithm(symmetric_matrix,n,eigen);
 
-    //TODO: print eigen
+    print_eigenvalues(eigen,n);
+    print_matrix(symmetric_matrix,n,n);
 
     free_Eigen_struct(eigen,n);
     free_array_2d(symmetric_matrix,n);
-
 }
 
 

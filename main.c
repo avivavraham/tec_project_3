@@ -56,11 +56,7 @@ int main(int argc, char **argv) {
         init_Eigen_struct(eigen,*num_rows);
         Jacobi_algorithm(data_points,*num_rows,eigen);
 
-        for(i=0;i<*num_rows-1;i++){
-            printf("%f", eigen[i].value);
-            printf(",");
-        }
-        printf("%f\n", eigen[i].value);
+        print_eigenvalues(eigen,*num_rows);
 
         double** eigenvectors = allocate_array_2d(*num_rows, *num_rows);
         // U matrix takes the k first vectors as columns,

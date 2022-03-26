@@ -47,6 +47,7 @@ void sort_eigen(Eigen *eigen, int n);
 void set_U_matrix(double ** U,Eigen *eigen, int n, int k);
 double get_squared_sum_of_column(double ** matrix,int n, int c);
 void calculate_T_matrix(double ** T,double ** U,int n,int k);
+void print_eigenvalues(Eigen *eigen, int num_rows);
 
 
 #endif //TEC_PROJECT_3_NSCLUSTERING_H

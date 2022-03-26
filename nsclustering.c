@@ -444,3 +444,12 @@ void calculate_T_matrix(double ** T,double ** U,int n,int k){
         }
     }
 }
+
+void print_eigenvalues(Eigen *eigen, int num_rows){
+    int i;
+    for(i=0;i<num_rows-1;i++){
+        printf("%f", eigen[i].value);
+        printf(",");
+    }
+    printf("%f\n", eigen[i].value);
+}

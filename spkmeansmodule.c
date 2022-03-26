@@ -76,6 +76,8 @@ static PyObject* kmeans(PyObject *self, PyObject *args){
     convertPython2DArray(py_centroids,centroids,k,d);
     convertPython2DArray(py_data_points,data_points,num_rows,d);
 
+    algorithm(k,d,num_rows,max_iter,data_points, centroids);
+
     result = createPyObjectFrom2DArray(centroids,num_rows,d,k);
 
     free_array_2d(centroids, k);
@@ -165,9 +167,9 @@ static PyObject* ddg(PyObject *self, PyObject *args) {
 
     PyObject *py_data_points;
     double **data_points;
-    int num_rows,k,d;
+    int num_rows,d;
 
-    if(!PyArg_ParseTuple(args, "iiiO", &k,&d,&num_rows,&py_data_points)) {
+    if(!PyArg_ParseTuple(args, "iiO" ,&d,&num_rows,&py_data_points)) {
         return NULL; /* In the CPython API, a NULL value is never valid for a
                         PyObject* so it is used to signal that an error has occurred. */
     }
@@ -193,9 +195,9 @@ static PyObject* lnorm(PyObject *self, PyObject *args) {
 
     PyObject *py_data_points,*result;
     double **data_points;
-    int num_rows,k,d;
+    int num_rows,d;
 
-    if(!PyArg_ParseTuple(args, "iiiO", &k,&d,&num_rows,&py_data_points)) {
+    if(!PyArg_ParseTuple(args, "iiO" ,&d,&num_rows,&py_data_points)) {
         return NULL; /* In the CPython API, a NULL value is never valid for a
                         PyObject* so it is used to signal that an error has occurred. */
     }
@@ -224,10 +226,10 @@ static PyObject* jacobi(PyObject *self, PyObject *args) {
 
     PyObject *py_symmetric_matrix,*result;
     double **symmetric_matrix;
-    int n,k,d;
+    int n,d;
     Eigen *eigen;
 
-    if(!PyArg_ParseTuple(args, "iiiO", &k, &d, &n, &py_symmetric_matrix)) {
+    if(!PyArg_ParseTuple(args, "iiO" , &d, &n, &py_symmetric_matrix)) {
         return NULL; /* In the CPython API, a NULL value is never valid for a
                         PyObject* so it is used to signal that an error has occurred. */
     }

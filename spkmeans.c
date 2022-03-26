@@ -95,14 +95,12 @@ every iteration it calculates the clusters and then updates the centroids
 when the difference squared distance of all the centroids is smaller than epsilon we stop and return the centroids
 */
 
-void algorithm(int k, int d, int num_rows, int max_iter, double **data_points) {
+void algorithm(int k, int d, int num_rows, int max_iter, double **data_points, double **centroids) {
     int i, j;
     double diff, sq_diff, max, epsilon = 0.001;
     double *sum_diff_centroids,*num_elements_in_cluster;
-    double **centroids,**new_centroids,**clusters; //each centroid represent cluster (the average of the cluster)
+    double **new_centroids,**clusters; //each centroid represent cluster (the average of the cluster)
 
-    centroids = allocate_array_2d(k, d); //TODO: free this array
-    init_centroids(k,d,centroids,data_points);
     num_elements_in_cluster = calloc(k, sizeof(int));
     error_occurred(num_elements_in_cluster == NULL);
     clusters = allocate_array_2d(k, d);
@@ -205,12 +203,12 @@ void zero_array_2d(double **arr, int r, int c) {
     }
 }
 
-void init_centroids(int k,int d,double **centroids, double **data_points) {
-    int i, j;
-    for (i = 0; i < k; i++) {
-        for (j = 0; j < d; j++) {
-            centroids[i][j] = data_points[i][j];
-        }
-    }
-
-}
+//void init_centroids(int k,int d,double **centroids, double **data_points) {
+//    int i, j;
+//    for (i = 0; i < k; i++) {
+//        for (j = 0; j < d; j++) {
+//            centroids[i][j] = data_points[i][j];
+//        }
+//    }
+//
+//}

@@ -69,7 +69,7 @@ if __name__ == '__main__':
 
         validate(args[0].isdigit())
         K = int(args[0])
-        validate(K > 1)
+        validate(K >= 0)
 
         goal = args[1]
         file_path = args[2]
@@ -86,8 +86,9 @@ if __name__ == '__main__':
         if goal == "spk":
 
             data_points = sp.spk()
+            K = len(data_points[0]) #if K == 0 then we found K in the heuristic 
             centroids = k_means_initialization(K, data_points, printIndex=True)
-            max_iter = 200
+            max_iter = 300
             epsilon = 0.001
             centroids = sp.kmeans(K, max_iter, d, num_rows, epsilon, centroids.tolist(), data_points.tolist())
             for i in range(K):
@@ -100,16 +101,17 @@ if __name__ == '__main__':
             print("")
 
         elif goal == "wam":
-            matrix = sp.wam()
+            sp.wam(d,num_rows,data_points.tolist())
 
         elif goal == "ddg":
-            matrix = sp.ddg()
+            sp.ddg(d,num_rows,data_points.tolist())
 
         elif goal == "lnorm":
-            matrix = sp.lnorm()
+            sp.lnorm(d,num_rows,data_points.tolist())
 
         elif goal == "jacobi":
-            matrix = sp.jacobi()
+            #TODO: validate symmetric matrix
+            sp.jacobi(d,num_rows,data_points.tolist())
 
     except Exception:
         print('An Error Has Occurred')

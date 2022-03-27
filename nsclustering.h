@@ -1,7 +1,3 @@
-//
-// Created by aviva on 2/27/2022.
-//
-
 #ifndef TEC_PROJECT_3_NSCLUSTERING_H
 #define TEC_PROJECT_3_NSCLUSTERING_H
 
@@ -50,4 +46,4 @@ void calculate_T_matrix(double ** T,double ** U,int n,int k);
 void print_eigenvalues(Eigen *eigen, int num_rows);
 
 
-#endif //TEC_PROJECT_3_NSCLUSTERING_H
+#endif

@@ -3,7 +3,7 @@
 
 python3 setup.py build_ext --inplace
 #./spkmeans 3 lnorm input_1.txt
-#gcc -ansi -Wall -Wextra -Werror -pedantic-errors spkmeans.c -lm -o spkmeans
+#gcc -ansi -Wall -Wextra -Werror -pedantic-errors main.c -lm -o spkmeans
 #python3 kmeans_pp.py 3 100 0.01 test_data/input_1_db_1.txt test_data/input_1_db_2.txt
 #python3 kmeans_pp.py 7 0.01 test_data/input_2_db_1.txt test_data/input_2_db_2.txt
 #python3 kmeans_pp.py 15 0.01 test_data/input_3_db_1.txt test_data/input_3_db_2.txt

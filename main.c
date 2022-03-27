@@ -1,9 +1,9 @@
 
-#include <main.h>
+#include "main.h"
 
 int main(int argc, char **argv) {
 
-    int *d,*num_rows,i;
+    int *d,*num_rows;
     char *input_file, *goal;
     double **data_points;
     Eigen *eigen;
@@ -11,8 +11,6 @@ int main(int argc, char **argv) {
     input_valid(argc == 3);
     goal = argv[1];
     input_file = argv[2];
-
-    //TODO: initialize k
 
     init_data_frame(d,num_rows,input_file,data_points);
 

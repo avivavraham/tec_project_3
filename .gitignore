@@ -3,6 +3,7 @@
 cmake-build-Debug
 CMakeLists.txt
 .idea
+tests
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -188,3 +189,4 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+/tests/

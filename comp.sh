@@ -12,4 +12,6 @@
 #rm mykmeanssp.cpython-39-darwin.so
 
 gcc -ansi -Wall -Wextra -Werror -pedantic-errors spkmeans.c nsclustering.c helper.c -lm -o spkmeans
-./spkmeans wam testfiles/spk_9.txt | diff - testfiles/outputs/c/wam/spk_9.txt
+./spkmeans wam /Users/I555060/University/software-project/tec_project_3/testfiles/spk_0.txt &> output.txt
+cat output.txt
+#./spkmeans wam testfiles/spk_9.txt | diff - testfiles/outputs/c/wam/spk_9.txt

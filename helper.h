@@ -6,7 +6,7 @@
 void input_valid(int condition);
 int find_vectors_len(FILE *fp);
 int find_d_of_vector(FILE *fp);
-void init_data_frame(const int *d,const int *num_rows, char *input_file,double **data_points);
+void init_data_frame(FILE *ifp, int d,double **data_points);
 int find_closets_cluster(int k,int d,double *data_point, double **centroids);
 void algorithm(int k, int d, int num_rows, int max_iter, double **data_points, double **centroids);
 void free_array_2d(double **arr, int r);

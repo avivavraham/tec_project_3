@@ -40,25 +40,13 @@ int find_d_of_vector(FILE *fp) {
     return d;
 }
 
-void init_data_frame(const int *d,const int *num_rows, char *input_file,double **data_points) {
-    FILE *ifp = NULL;
+void init_data_frame(FILE *ifp, int d,double **data_points) {
     int i = 0, j;
     char line[1024];
-    int local_num_rows, local_d;
-
-    ifp = fopen(input_file, "r");
-    error_occurred(ifp == NULL);
-
-    local_num_rows = find_vectors_len(ifp);
-    num_rows = &local_num_rows;
-    local_d = find_d_of_vector(ifp);
-    d = &local_d;
-
-    data_points = allocate_array_2d(*num_rows, *d);
 
     while (fgets(line, sizeof line, ifp) != NULL) {
         line[strlen(line) - 1] = '\0';
-        for (j = 0; j < *d; j++) {
+        for (j = 0; j < d; j++) {
             if (j == 0) {
                 data_points[i][j] = atof(strtok(line, ","));
             } else {

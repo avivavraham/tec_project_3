@@ -87,7 +87,6 @@ void print_matrix(double **matrix, int size_row, int size_column){
         }
         printf("\n");
     }
-    printf("\n");
 }
 
 /*
@@ -157,7 +156,6 @@ void matrix_subtraction(double ** matrix1, double ** matrix2, int row_size, int 
 
 void calculate_diagonal_degree_matrix(double **matrix, double** weight_matrix,int len){
     calculate_degree_matrix(matrix,weight_matrix,len);
-    degree_matrix_normalized(matrix,len); /* returns D^-(0.5) */
 }
 
 void set_matrix_to_Identity(double ** matrix, int n){
@@ -176,6 +174,7 @@ void calculate_lnorm_matrix(double **lnorm_matrix,double** weight_matrix, double
     double **result2 = allocate_array_2d(n,n);
     set_matrix_to_Identity(Identity_matrix,n);
 
+    degree_matrix_normalized(diagonal_matrix,n); /* returns D^-(0.5) */
 
     /* Calculate W x D(^-0.5) */
     matrix_multiplication(weight_matrix,n,n,diagonal_matrix,n,result1);

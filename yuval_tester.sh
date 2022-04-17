@@ -51,9 +51,9 @@ function verdict_diff() {
 	if [[ $1 -eq 0 ]]; then
 		echo -ne '\033[1;32mSUCCESS\e[0m' # print out a 'success' message
 	else
+	  echo
 		echo -ne "\e[1;31mFAILED\e[0m" # print out a 'failed' message
 		echo "--- num of diff: $1 ---"
-		exit 1
 	fi
 }
 
@@ -68,10 +68,8 @@ function individual_test() {
 	if [[ "${1}" == "py" ]]; then # if we are testing the python interface
 		python3 spkmeans.py 0 $2 $testers_path/$3 &> $output_file
 	elif [[ "${1}" == "c" ]]; then # if we are testing the C interface
-    echo "dont have valgrind"
+#    echo "dont have valgrind"
 #		valgrind --leak-check=yes --log-file=$valgrind_file ./spkmeans $2 $testers_path/$3 &> $output_file
-    echo $2
-    echo $testers_path/$3
     ./spkmeans $2 $testers_path/$3 &> $output_file
 	else
 		echo "Individual test function failed: Invalid interface"
@@ -80,7 +78,7 @@ function individual_test() {
 
 	# calculating the difference between the desired output and the actual output
 	diff_result=$(diff $output_file $testers_path/outputs/$1/$2/$3 2>&1)
-	echo "--- output file --- "
+#	echo "--- output file --- "
 #	cat $output_file
 #	echo "--- expected output --- "
 #	cat $testers_path/outputs/$1/$2/$3
@@ -91,6 +89,7 @@ function individual_test() {
 	# if the test failed, print a report of the 'diff' operation into the test transcript of the interface
 	if [[ ${#diff_result} -ne 0 ]]; then 
 		echo -e "DIFF RESULT FOR: ${1}: ${2}: ${3}:\n${diff_result}\n\n" >> test_transcript_$1.txt
+		exit 1
 	fi
 	
 	# if the interface is C, verdict if the test had a memory leak, and print an appropriate status accordingly

@@ -1,6 +1,6 @@
 #define PY_SSIZE_T_CLEAN
 #include "Python.h"
-#include "spkmeans.h"
+#include "helper.h"
 #include "nsclustering.h"
 /*
 we get PyObject that represents 2 dimensional array and we convert it
@@ -108,7 +108,7 @@ static PyObject* spk(PyObject *self, PyObject *args){
     calculate_diagonal_degree_matrix(diagonal_degree_matrix,weighted_matrix,num_rows);
 
     double** lnorm_matrix = allocate_array_2d(num_rows, num_rows);
-    calculate_lnorm_matrix(lnorm_matrix,weighted_matrix,diagonal_degree_matrix,*num_rows);
+    calculate_lnorm_matrix(lnorm_matrix,weighted_matrix,diagonal_degree_matrix,num_rows);
     print_matrix(lnorm_matrix, num_rows, num_rows);
 
     eigen = calloc(num_rows, sizeof (Eigen *));

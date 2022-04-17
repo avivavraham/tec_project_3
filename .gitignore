@@ -4,6 +4,10 @@ cmake-build-Debug
 CMakeLists.txt
 .idea
 tests
+memory_transcript_c.txt
+test_transcript_c.txt
+test_transcript_py.txt
+spkmeans
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

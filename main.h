@@ -2,7 +2,7 @@
 #define TEC_PROJECT_3_MAIN_H
 
 #include "libraries.h"
-#include "spkmeans.h"
+#include "helper.h"
 #include "nsclustering.h"
 
 void input_valid(int condition);

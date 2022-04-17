@@ -1,7 +1,3 @@
-//
-// Created by Aviv Avraham on 2/27/2022.
-//
-
 #include "nsclustering.h"
 
 /*
@@ -63,7 +59,8 @@ dij =
         0, otherwise
 */
 void calculate_degree_matrix(double **degree_matrix, double ** weighted_matrix, int N){
-    for (int i = 0; i < N; ++i) {
+    int i;
+    for (i = 0; i < N; ++i) {
         degree_matrix[i][i] = sum_of_row(weighted_matrix[i],N);
     }
 }
@@ -72,7 +69,8 @@ void calculate_degree_matrix(double **degree_matrix, double ** weighted_matrix, 
 */
 double sum_of_row(const double *row_vector, int len){
     double sum=0;
-    for (int i = 0; i < len; ++i) {
+    int i;
+    for (i = 0; i < len; ++i) {
         sum += row_vector[i];
     }
     return sum;
@@ -101,13 +99,14 @@ void print_matrix(double **matrix, int size_row, int size_column){
  * of the matrix are raised by the given power.
 */
 void pow_matrix(double ** matrix,int size_row, int size_column , double pow_, int diag_pow_optional){
+    int i,j;
     if(diag_pow_optional){
-        for (int i = 0; i < size_row; ++i) {
+        for (i = 0; i < size_row; ++i) {
             matrix[i][i] = pow(matrix[i][i],pow_);
         }
     } else{
-        for (int i = 0; i < size_row; ++i) {
-            for (int j = 0; j < size_column; ++j) {
+        for (i = 0; i < size_row; ++i) {
+            for (j = 0; j < size_column; ++j) {
                 matrix[i][j] = pow(matrix[i][j],pow_);
             }
         }
@@ -119,6 +118,7 @@ void pow_matrix(double ** matrix,int size_row, int size_column , double pow_, in
 */
 void **degree_matrix_normalized(double ** degree_matrix, int num_rows){
     pow_matrix(degree_matrix,num_rows,num_rows,-0.5,1);
+    return NULL;
 }
 
 /*
@@ -126,11 +126,12 @@ void **degree_matrix_normalized(double ** degree_matrix, int num_rows){
  * assumption: the dimensions for the multiplication are valid,there for,column1_size = row2_size.
 */
 void matrix_multiplication(double ** matrix1, int row1_size, int column1_size,
-                               double ** matrix2, int row2_size, int column2_size, double **result){
-    for (int i = 0; i < row1_size; ++i) {
-        for (int j = 0; j < column2_size; ++j) {
+                               double ** matrix2, int column2_size, double **result){
+    int i,j,k;
+    for (i = 0; i < row1_size; ++i) {
+        for (j = 0; j < column2_size; ++j) {
             double sum = 0;
-            for (int k = 0; k < column1_size; ++k) {
+            for (k = 0; k < column1_size; ++k) {
                 sum += matrix1[i][k] * matrix2[k][j];
             }
             result[i][j] = sum;
@@ -144,8 +145,9 @@ void matrix_multiplication(double ** matrix1, int row1_size, int column1_size,
  * there for,row_size for matrix 1 = row_size for matrix 2. and so for columns sizes.
 */
 void matrix_subtraction(double ** matrix1, double ** matrix2, int row_size, int column_size, double **result){
-    for (int i = 0; i < row_size; ++i) {
-        for (int j = 0; j < column_size; ++j) {
+    int i,j;
+    for (i = 0; i < row_size; ++i) {
+        for (j = 0; j < column_size; ++j) {
             result[i][j] = matrix1[i][j] - matrix2[i][j];
         }
     }
@@ -158,11 +160,12 @@ void matrix_subtraction(double ** matrix1, double ** matrix2, int row_size, int 
 
 void calculate_diagonal_degree_matrix(double **matrix, double** weight_matrix,int len){
     calculate_degree_matrix(matrix,weight_matrix,len);
-    degree_matrix_normalized(matrix,len); //returns D^-(0.5)
+    degree_matrix_normalized(matrix,len); /* returns D^-(0.5) */
 }
 
 void set_matrix_to_Identity(double ** matrix, int n){
-    for (int i = 0; i < n; ++i) {
+    int i;
+    for (i = 0; i < n; ++i) {
         matrix[i][i] = 1;
     }
 }
@@ -177,13 +180,13 @@ void calculate_lnorm_matrix(double **lnorm_matrix,double** weight_matrix, double
     set_matrix_to_Identity(Identity_matrix,n);
 
 
-    // Calculate W x D(^-0.5)
-    matrix_multiplication(weight_matrix,n,n,diagonal_matrix,n,n,result1);
+    /* Calculate W x D(^-0.5) */
+    matrix_multiplication(weight_matrix,n,n,diagonal_matrix,n,result1);
 
-    // Calculate (D^-0.5)*W*D(^-0.5)
-    matrix_multiplication(diagonal_matrix,n,n,result1,n,n,result2);
+    /* Calculate (D^-0.5)*W*D(^-0.5) */
+    matrix_multiplication(diagonal_matrix,n,n,result1,n,result2);
 
-    // Calculate lnorm_matrix = I - (D^-0.5)*W*D(^-0.5)
+    /* Calculate lnorm_matrix = I - (D^-0.5)*W*D(^-0.5) */
     matrix_subtraction(Identity_matrix,result2,n,n,lnorm_matrix);
 
     free_array_2d(Identity_matrix,n);
@@ -302,7 +305,7 @@ void Jacobi_set_Eigen(Eigen *eigen, int n, double **vectors, double **values){
     for(j=0;j<n;j++){
         eigen[j].value = values[j][j];
         for(i=0;i<n;i++){
-            eigen[j].vector[i] = vectors[i][j]; // transfer the column in vectors to row
+            eigen[j].vector[i] = vectors[i][j]; /* transfer the column in vectors to row */
         }
     }
 }
@@ -324,25 +327,25 @@ void Jacobi_algorithm(double **laplacian, int n, Eigen *eigen){
     set_matrix_to_Identity(V,n);
 
     while(num_iter > 0 && diff >= epsilon){
-        p = Jacobi_find_ij(A,n); // 1.2.1.3
-        //1.2.1.4
+        p = Jacobi_find_ij(A,n); /* 1.2.1.3 */
+        /* 1.2.1.4 */
         i = p.i;
         j = p.j;
         theta = (A[j][j] - A[i][i]) / (2 * A[i][j]);
-        t = get_sign(theta) / (fabs(theta) + sqrt(pow(theta,2) + 1 ));
+        t = Jacobi_get_sign(theta) / (fabs(theta) + sqrt(pow(theta,2) + 1 ));
         c = 1 / (sqrt(pow(t,2)) + 1 );
         s = t * c;
 
         zero_array_2d(P_matrix,n,n);
         zero_array_2d(result,n,n);
 
-        Jacobi_set_matrix_P(P_matrix,n,i,j,c,s); // 1.2.1.2
-        matrix_multiplication(V,n,n,P_matrix,n,n,result); // 1.2.1.1.e
+        Jacobi_set_matrix_P(P_matrix,n,i,j,c,s); /* 1.2.1.2 */
+        matrix_multiplication(V,n,n,P_matrix,n,result); /* 1.2.1.1.e */
         set_equal_array_2d(V,result,n,n);
 
         Jacobi_set_matrix_A_new(A_new,A,n,i,j,c,s);
 
-        diff = Jacobi_find_diff_off(A,A_new,n); // 1.2.1.5
+        diff = Jacobi_find_diff_off(A,A_new,n); /* 1.2.1.5 */
         num_iter--;
 
         set_equal_array_2d(A,A_new,n,n);
@@ -387,7 +390,7 @@ int calculate_eigengap_heuristic(Eigen *eigens ,int n){
 
     sort_eigen(eigens,n);
 
-    for(i=0;i<n-1;i++){ //TODO: verify this calculation
+    for(i=0;i<n-1;i++){ /* TODO: verify this calculation */
         eigengap[i] = eigens[i+1].value - eigens[i].value;
     }
 
@@ -399,8 +402,8 @@ int calculate_eigengap_heuristic(Eigen *eigens ,int n){
     }
 
     free(eigengap);
-    //TODO: verify this
-    return argmax + 1; // because according to the presentation we calculate the eigenvalues from 1 to n
+    /* TODO: verify this */
+    return argmax + 1; /* because according to the presentation we calculate the eigenvalues from 1 to n */
 }
 
 /*

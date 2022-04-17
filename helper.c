@@ -25,7 +25,7 @@ int find_vectors_len(FILE *fp) {
 int find_d_of_vector(FILE *fp) {
     char line[1024];
     int i = 0;
-    int d=0;
+    int d=1;
     fseek(fp, 0, SEEK_SET);
     if (fgets(line, sizeof line, fp) != NULL) {
         line[i] = line[0];

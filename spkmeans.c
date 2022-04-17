@@ -23,7 +23,6 @@ int main(int argc, char **argv) {
     data_points = allocate_array_2d(num_rows, d);
 
     init_data_frame(ifp, d,data_points);
-    printf("%s", "after init \n");
 
     if (strcmp(goal, "wam") == 0){
         weighted_matrix = allocate_array_2d(num_rows, num_rows);

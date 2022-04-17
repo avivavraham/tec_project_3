@@ -81,7 +81,7 @@ function individual_test() {
 	# calculating the difference between the desired output and the actual output
 	diff_result=$(diff $output_file $testers_path/outputs/$1/$2/$3 2>&1)
 	echo "--- output file --- "
-	cat $output_file
+#	cat $output_file
 #	echo "--- expected output --- "
 #	cat $testers_path/outputs/$1/$2/$3
 

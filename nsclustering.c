@@ -80,15 +80,12 @@ double sum_of_row(const double *row_vector, int len){
 */
 void print_matrix(double **matrix, int size_row, int size_column){
     int i,j;
-    printf("[");
     for (i = 0; i < size_row ; ++i) {
-        printf("[");
         for (j = 0; j < size_column; ++j) {
-            printf("%f", matrix[i][j]);
+            printf("%.4f", matrix[i][j]);
             if (j != size_column-1){printf(",");}
         }
-        if(i == size_row-1){printf("]");}
-        printf("]\n");
+        printf("\n");
     }
     printf("\n");
 }

@@ -8,6 +8,7 @@ memory_transcript_c.txt
 test_transcript_c.txt
 test_transcript_py.txt
 spkmeans
+output.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

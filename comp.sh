@@ -15,4 +15,4 @@ gcc -ansi -Wall -Wextra -Werror -pedantic-errors spkmeans.c nsclustering.c helpe
 ./spkmeans wam /Users/I555060/University/software-project/tec_project_3/testfiles/spk_0.txt &> output.txt
 #cat output.txt
 #./spkmeans wam testfiles/spk_9.txt | diff - testfiles/outputs/c/wam/spk_9.txt
-#./yuval_tester.sh /Users/I555060/University/software-project/tec_project_3/testfiles
+./yuval_tester.sh /Users/I555060/University/software-project/tec_project_3/testfiles

@@ -9,6 +9,9 @@ test_transcript_c.txt
 test_transcript_py.txt
 spkmeans
 output.txt
+yuval_tester.sh
+testfiles
+project_comprehensive_test
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

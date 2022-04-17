@@ -202,7 +202,7 @@ Point Jacobi_find_ij(double ** matrix,int n) {
 
     for(i=0;i<n;i++){
         for(j=i+1;j<n;j++){
-            num = matrix[i][j];
+            num = fabs(matrix[i][j]);
             if (num > max){
                 max = num;
                 p.i = i;
@@ -276,18 +276,19 @@ void Jacobi_set_matrix_P(double **matrix, int n, int i,int j, double c, double s
 }
 
 void init_Eigen_struct(Eigen *eigen, int n){
-    int i=0;
+    int i;
     for(i=0;i<n;i++){
-        eigen[i].vector = calloc(n, sizeof(double *));
+        eigen[i].vector = calloc(n, sizeof(double));
         error_occurred(eigen[i].vector == NULL);
     }
 }
 
 void free_Eigen_struct(Eigen *eigen, int n){
-    int i=0;
+    int i;
     for(i=0;i<n;i++){
         free(eigen[i].vector);
     }
+    free(eigen);
 }
 
 /*
@@ -307,11 +308,9 @@ void Jacobi_set_Eigen(Eigen *eigen, int n, double **vectors, double **values){
 }
 
 void Jacobi_algorithm(double **laplacian, int n, Eigen *eigen){
-    double diff,theta,t,c,s;
+    double diff=1,theta,t,c,s;
     double epsilon = pow(10,-5);
-    int i,j;
     int num_iter=100;
-    Point p;
     double ** V = allocate_array_2d(n,n);
     double ** A = allocate_array_2d(n,n);
     double ** A_new = allocate_array_2d(n,n);
@@ -323,10 +322,10 @@ void Jacobi_algorithm(double **laplacian, int n, Eigen *eigen){
     set_matrix_to_Identity(V,n);
 
     while(num_iter > 0 && diff >= epsilon){
-        p = Jacobi_find_ij(A,n); /* 1.2.1.3 */
+        Point p = Jacobi_find_ij(A,n); /* 1.2.1.3 */
         /* 1.2.1.4 */
-        i = p.i;
-        j = p.j;
+        int i = p.i;
+        int j = p.j;
         theta = (A[j][j] - A[i][i]) / (2 * A[i][j]);
         t = Jacobi_get_sign(theta) / (fabs(theta) + sqrt(pow(theta,2) + 1 ));
         c = 1 / (sqrt(pow(t,2)) + 1 );
@@ -447,8 +446,8 @@ void calculate_T_matrix(double ** T,double ** U,int n,int k){
 void print_eigenvalues(Eigen *eigen, int num_rows){
     int i;
     for(i=0;i<num_rows-1;i++){
-        printf("%f", eigen[i].value);
+        printf("%.4f", eigen[i].value);
         printf(",");
     }
-    printf("%f\n", eigen[i].value);
+    printf("%.4f\n", eigen[i].value);
 }

@@ -54,21 +54,20 @@ int main(int argc, char **argv) {
 
         free_array_2d(diagonal_degree_matrix,num_rows);
         free_array_2d(weighted_matrix, num_rows);
-
     }
     else if (strcmp(goal, "jacobi") == 0){
-
         input_valid(num_rows == d);
-        eigen = calloc(num_rows, sizeof (Eigen *));
+        eigen = calloc(num_rows, sizeof (Eigen));
         error_occurred(eigen == NULL);
         init_Eigen_struct(eigen,num_rows);
         Jacobi_algorithm(data_points,num_rows,eigen);
-
         print_eigenvalues(eigen,num_rows);
 
         eigenvectors = allocate_array_2d(num_rows, num_rows);
         set_U_matrix(eigenvectors,eigen,num_rows,num_rows);
         print_matrix(eigenvectors,num_rows,num_rows);
+
+        free_Eigen_struct(eigen,num_rows);
 
     } else{
         free_array_2d(data_points,num_rows);

@@ -1,5 +1,5 @@
 #define PY_SSIZE_T_CLEAN
-#include "Python.h"
+#include <Python.h>
 #include "helper.h"
 #include "nsclustering.h"
 /*
@@ -150,6 +150,8 @@ static PyObject* wam(PyObject *self, PyObject *args) {
                         PyObject* so it is used to signal that an error has occurred. */
     }
 
+    printf("d= %d, n= %d\n", d, num_rows);
+
     data_points = allocate_array_2d(num_rows, d);
     convertPython2DArray(py_data_points,data_points,num_rows,d);
 
@@ -160,7 +162,7 @@ static PyObject* wam(PyObject *self, PyObject *args) {
 
     free_array_2d(weighted_matrix,num_rows);
     free_array_2d(data_points,num_rows);
-
+    Py_RETURN_NONE;
 }
 
 static PyObject* ddg(PyObject *self, PyObject *args) {
@@ -187,6 +189,7 @@ static PyObject* ddg(PyObject *self, PyObject *args) {
     free_array_2d(weighted_matrix,num_rows);
     free_array_2d(diagonal_degree_matrix,num_rows);
     free_array_2d(data_points,num_rows);
+    Py_RETURN_NONE;
 
 }
 
@@ -218,6 +221,7 @@ static PyObject* lnorm(PyObject *self, PyObject *args) {
     free_array_2d(diagonal_degree_matrix,num_rows);
     free_array_2d(lnorm_matrix,num_rows);
     free_array_2d(data_points,num_rows);
+    Py_RETURN_NONE;
 
 }
 
@@ -247,6 +251,7 @@ static PyObject* jacobi(PyObject *self, PyObject *args) {
 
     free_Eigen_struct(eigen,n);
     free_array_2d(symmetric_matrix,n);
+    Py_RETURN_NONE;
 }
 
 

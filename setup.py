@@ -23,8 +23,8 @@ from setuptools import setup, find_packages, Extension
 
 # setup() parameters - https://packaging.python.org/guides/distributing-packages-using-setuptools/
 setup(
-    name='kmeans++',
-    version='0.1.0',
+    name='spkmeans',
+    version='0.1.1',
     author="Yoni Romm, Aviv avraham",
     author_email="yonik12@gmail.com",
     description="A sample C-API",
@@ -51,7 +51,7 @@ setup(
             # the qualified name of the extension module to build
             'spkmeans',
             # the files to compile into our module relative to ``setup.py``
-            ['spkmeans.c'], #TODO: add here spkmeansmodule.c
+            ['spkmeansmodule.c','nsclustering.c','helper.c'],
         ),
     ]
 )

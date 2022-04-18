@@ -2,6 +2,7 @@ import numpy as np
 import spkmeans as sp
 import sys
 import pandas as pd
+import traceback
 
 # To use this run in the terminal: python setup.py build_ext --inplace
 # And on Nova: python3.8.5 setup.py build_ext --inplace
@@ -75,11 +76,12 @@ if __name__ == '__main__':
         file_path = args[2]
 
         file = pd.read_csv(file_path, header=None)
-        file = file.sort_values(by=0,axis=0)
-        data_points = file.drop(columns=[0], axis=1).to_numpy()
+        # file = file.sort_values(by=0,axis=0)
+        # data_points = file.drop(columns=[0],axis=1).to_numpy()
+        data_points = file.to_numpy()
 
         num_rows = data_points.shape[0]
-        d = data_points.shape[1]
+        d = data_points.shape[1] 
 
         validate(K < num_rows)
 
@@ -114,5 +116,6 @@ if __name__ == '__main__':
             sp.jacobi(num_rows,data_points.tolist())
 
     except Exception:
+        traceback.print_exc()
         print('An Error Has Occurred')
         exit(1)

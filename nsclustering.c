@@ -251,20 +251,19 @@ int Jacobi_get_sign(double num){
  */
 
 void Jacobi_set_matrix_A_new(double **A_new, double ** A,int n,int i,int j,double c,double s){
-    int row,column;
+    int row;
 
     for(row=0;row<n;row++){
-        for(column=0;column<n;column++){
-            if(row != i && row != j){
-                A_new[row][i] = c * A[row][i] - s * A[row][j];
-                A_new[row][j] = c * A[row][j] + s * A[row][i];
-            }
+        if(row != i && row != j){
+            A_new[row][i] = c * A[row][i] - s * A[row][j];
+            A_new[row][j] = c * A[row][j] + s * A[row][i];
         }
     }
 
     A_new[i][i] = pow(c,2) * A[i][i] + pow(s,2) * A[j][j] - 2 * s * c * A[i][j];
     A_new[j][j] = pow(s,2) * A[i][i] + pow(c,2) * A[j][j] + 2 * s * c * A[i][j];
     A_new[i][j] = 0;
+    A_new[j][i] = 0;
 }
 
 void Jacobi_set_matrix_P(double **matrix, int n, int i,int j, double c, double s){
@@ -323,12 +322,14 @@ void Jacobi_algorithm(double **laplacian, int n, Eigen *eigen){
 
     while(num_iter > 0 && diff >= epsilon){
         Point p = Jacobi_find_ij(A,n); /* 1.2.1.3 */
+        print_matrix(A,n,n);
         /* 1.2.1.4 */
         int i = p.i;
         int j = p.j;
+        printf("i: %d, j: %d\n",i,j);
         theta = (A[j][j] - A[i][i]) / (2 * A[i][j]);
         t = Jacobi_get_sign(theta) / (fabs(theta) + sqrt(pow(theta,2) + 1 ));
-        c = 1 / (sqrt(pow(t,2)) + 1 );
+        c = 1 / sqrt(pow(t,2) + 1);
         s = t * c;
 
         zero_array_2d(P_matrix,n,n);

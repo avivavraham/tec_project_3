@@ -31,6 +31,7 @@ void calculate_lnorm_matrix(double **lnorm_matrix,double** weight_matrix, double
 Point Jacobi_find_ij(double ** matrix,int n);
 int Jacobi_get_sign(double num);
 double Jacobi_find_diff_off(double **A,double **A_new, int n);
+void transpose_matrix(double **transposed,double ** matrix, int rows, int columns);
 void Jacobi_set_matrix_A_new(double **A_new, double ** A,int n,int i,int j,double c,double s);
 void Jacobi_set_matrix_P(double **matrix, int n, int i,int j, double c, double s);
 void Jacobi_algorithm(double **laplacian, int n, Eigen *eigen);

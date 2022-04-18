@@ -306,6 +306,15 @@ void Jacobi_set_Eigen(Eigen *eigen, int n, double **vectors, double **values){
     }
 }
 
+void transpose_matrix(double **transposed,double ** matrix, int rows, int columns){
+    int i,j;
+    for(i=0; i < rows; i ++){
+        for(j=0; j< columns; j++){
+            transposed[j][i] = matrix[i][j];
+        }
+    }
+}
+
 void Jacobi_algorithm(double **laplacian, int n, Eigen *eigen){
     double diff=1,theta,t,c,s;
     double epsilon = pow(10,-5);
@@ -314,6 +323,7 @@ void Jacobi_algorithm(double **laplacian, int n, Eigen *eigen){
     double ** A = allocate_array_2d(n,n);
     double ** A_new = allocate_array_2d(n,n);
     double ** P_matrix = allocate_array_2d(n,n);
+    double ** P_matrix_transposed = allocate_array_2d(n,n);
     double ** result = allocate_array_2d(n,n);
     set_equal_array_2d(A,laplacian,n,n);
     set_equal_array_2d(A_new,laplacian,n,n);
@@ -322,11 +332,9 @@ void Jacobi_algorithm(double **laplacian, int n, Eigen *eigen){
 
     while(num_iter > 0 && diff >= epsilon){
         Point p = Jacobi_find_ij(A,n); /* 1.2.1.3 */
-        print_matrix(A,n,n);
         /* 1.2.1.4 */
         int i = p.i;
         int j = p.j;
-        printf("i: %d, j: %d\n",i,j);
         theta = (A[j][j] - A[i][i]) / (2 * A[i][j]);
         t = Jacobi_get_sign(theta) / (fabs(theta) + sqrt(pow(theta,2) + 1 ));
         c = 1 / sqrt(pow(t,2) + 1);
@@ -339,7 +347,9 @@ void Jacobi_algorithm(double **laplacian, int n, Eigen *eigen){
         matrix_multiplication(V,n,n,P_matrix,n,result); /* 1.2.1.1.e */
         set_equal_array_2d(V,result,n,n);
 
-        Jacobi_set_matrix_A_new(A_new,A,n,i,j,c,s);
+        transpose_matrix(P_matrix_transposed,P_matrix,n,n);
+        matrix_multiplication(P_matrix_transposed,n,n,A,n,result); /* 1.2.1.1.e */
+        matrix_multiplication(result,n,n,P_matrix,n,A_new); /* 1.2.1.1.e */
 
         diff = Jacobi_find_diff_off(A,A_new,n); /* 1.2.1.5 */
         num_iter--;

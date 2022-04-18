@@ -111,7 +111,7 @@ static PyObject* spk(PyObject *self, PyObject *args){
     calculate_lnorm_matrix(lnorm_matrix,weighted_matrix,diagonal_degree_matrix,num_rows);
     print_matrix(lnorm_matrix, num_rows, num_rows);
 
-    eigen = calloc(num_rows, sizeof (Eigen *));
+    eigen = calloc(num_rows, sizeof (Eigen));
     error_occurred(eigen == NULL);
 
     init_Eigen_struct(eigen,num_rows);
@@ -150,7 +150,7 @@ static PyObject* wam(PyObject *self, PyObject *args) {
                         PyObject* so it is used to signal that an error has occurred. */
     }
 
-    printf("d= %d, n= %d\n", d, num_rows);
+//    printf("d= %d, n= %d\n", d, num_rows);
 
     data_points = allocate_array_2d(num_rows, d);
     convertPython2DArray(py_data_points,data_points,num_rows,d);
@@ -227,12 +227,12 @@ static PyObject* lnorm(PyObject *self, PyObject *args) {
 
 static PyObject* jacobi(PyObject *self, PyObject *args) {
 
-    PyObject *py_symmetric_matrix,*result;
-    double **symmetric_matrix;
-    int n,i;
+    PyObject *py_symmetric_matrix;
+    double **symmetric_matrix, **eigenvectors;
+    int n;
     Eigen *eigen;
 
-    if(!PyArg_ParseTuple(args, "iiO" , &n, &py_symmetric_matrix)) {
+    if(!PyArg_ParseTuple(args, "iO" , &n, &py_symmetric_matrix)) {
         return NULL; /* In the CPython API, a NULL value is never valid for a
                         PyObject* so it is used to signal that an error has occurred. */
     }
@@ -240,14 +240,17 @@ static PyObject* jacobi(PyObject *self, PyObject *args) {
     symmetric_matrix = allocate_array_2d(n, n);
     convertPython2DArray(py_symmetric_matrix, symmetric_matrix, n, n);
 
-    eigen = calloc(n, sizeof (Eigen *));
+    eigen = calloc(n, sizeof (Eigen));
     error_occurred(eigen == NULL);
 
     init_Eigen_struct(eigen,n);
     Jacobi_algorithm(symmetric_matrix,n,eigen);
 
     print_eigenvalues(eigen,n);
-    print_matrix(symmetric_matrix,n,n);
+
+    eigenvectors = allocate_array_2d(n, n);
+    set_U_matrix(eigenvectors,eigen,n,n);
+    print_matrix(eigenvectors,n,n);
 
     free_Eigen_struct(eigen,n);
     free_array_2d(symmetric_matrix,n);

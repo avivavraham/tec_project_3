@@ -1,8 +1,6 @@
 #!/bin/bash
 
 
-
-
 # INSTRUCTIONS: Read, else get a bozo message.
 #	1. You shall place this shell script within the directory that contains all of the files
 #	That you need to assign.

@@ -15,8 +15,8 @@
 # global variables
 testers_path=$1
 leaks=$2
-output_file="/tmp/output.txt"
-valgrind_file="/tmp/valgrind.txt"
+output_file="./tmp/output.txt"
+valgrind_file="./tmp/valgrind.txt"
 
 # buffering between tests
 function buffer() {
@@ -45,7 +45,6 @@ function regular_test() {
 		touch $results_dir/memory_transcript_c.txt
 		echo -e "\n\e[4;37mTesting correct outputs for the interface of \e[4;33m\e[1;33mC\e[0m:"
 		echo -e "\n\e[4;34m\e[1;34mRESULTS\e[0m"
-		bash comp.sh &> /dev/null # compiling
 		test_interface c
 		
 		buffer
@@ -53,12 +52,17 @@ function regular_test() {
 
 
 	if [[ $interface == @(py|both) ]]; then
+		
+		# if no regular tests were ordered, we shouldn't run the CPython interface test (happens when $regular == no, $leaks == yes)
+		if [[ $regular == "no" ]]; then
+			return
+		fi
+	
 		# testing the CPython interface
 		rm $results_dir/test_transcript_py.txt &> /dev/null
 		touch $results_dir/test_transcript_py.txt
 		echo -e "\e[4;37mTesting correct outputs for the interface of \e[4;33m\e[1;33mPython\e[0m:"
 		echo -e "\n\e[4;34m\e[1;34mRESULTS\e[0m"
-		python3 setup.py build_ext --inplace &> /dev/null # building
 		test_interface py
 		
 		buffer
@@ -72,6 +76,7 @@ function test_interface() {
 	# the first argument shall be the interface being tested
 	local_interface=$1
 
+	# else, run a test
 	test_goal $local_interface wam
 	test_goal $local_interface ddg
 	test_goal $local_interface lnorm
@@ -89,14 +94,15 @@ function test_goal() {
 	# the first argument shall be the interface being tested c/py
 	# the second argument shall be the goal being tested
 
+	# running a test for the goal
 	if [[ "${2}" == "jacobi" ]]; then
-		for i in {0..19}; do
+		for (( i = 0; i <= $jacobi; i++ )); do
 			echo -n "${1^^}: ${2^^}: ${testers_path}/jacobi_${i}.txt: "
 			individual_test $1 $2 jacobi_$i.txt
 			echo
 		done
 	else
-		for i in {0..9}; do
+		for (( i = 0; i <= $spk; i++ )); do
 			echo -n "${1^^}: ${2^^}: ${testers_path}/spk_${i}.txt: "
 			individual_test $1 $2 spk_$i.txt
 			echo
@@ -126,22 +132,34 @@ function individual_test() {
 		return -1
 	fi
 
-	# calculating the difference between the desired output and the actual output
-	diff_result=$(diff $output_file $testers_path/outputs/$1/$2/$3 2>&1)
-	
-	# verdicting if the test failed, then print an appropriate status
-	verdict_diff ${#diff_result}
-	
-	# if the test failed, print a report of the 'diff' operation into the test transcript of the interface
-	if [[ ${#diff_result} -ne 0 ]]; then 
-		echo -e "DIFF RESULT FOR: ${1}: ${2}: ${3}:\n${diff_result}\n\n" >> $results_dir/test_transcript_$1.txt
+	# if a regular test was asked
+	if [[ $regular == "yes" ]]; then
+		# calculating the difference between the desired output and the actual output
+		diff_result=$(diff $output_file $testers_path/outputs/$1/$2/$3 2>&1)
+		
+		# verdicting if the test failed, then print an appropriate status
+		verdict_diff ${#diff_result}
+		
+		# if the test failed, print a report of the 'diff' operation into the test transcript of the interface
+		if [[ ${#diff_result} -ne 0 ]]; then 
+			echo -e "DIFF RESULT FOR: ${1}: ${2}: ${3}:\n${diff_result}\n\n" >> $results_dir/test_transcript_$1.txt
+		fi
 	fi
 	
 	# if the interface is C, verdict if the test had a memory leak, and print an appropriate status accordingly
 	if [[ $leaks == "yes" ]]; then
 		if [[ $1 == "c" ]]; then
-			echo -n ": "
+		
+			# buffering
+			if [[ $regular == "yes" ]]; then
+				echo -n ": "
+			fi
+			
+			# running memory test
 			verdict_memory_loss
+			echo -e "MEMORY LEAK RESULT FOR: ${1}: ${2}: ${3}:\n\n" >> $results_dir/memory_transcript_c.txt
+			cat $valgrind_file >> $results_dir/memory_transcript_c.txt
+			echo -e "\n\n\n" >> $results_dir/memory_transcript_c.txt
 		fi
 	fi
 }
@@ -173,8 +191,6 @@ function verdict_memory_loss() {
 		echo -ne '\033[1;32mNO MEMORY LEAK\e[0m' # print out a 'success' message
 	else
 		echo -e "\e[1;31mMEMORY LEAK\e[0m" # print out a 'failed' message
-		cat $valgrind_file >> $results_dir/memory_transcript_c.txt
-		echo -e "\n\n\n" >> $results_dir/memory_transcript_c.txt
 	fi
 }
 
@@ -202,7 +218,7 @@ def stringify_row(row):
     return ",".join(row) + "\\n"
 
 # datapoints      
-save_dataset(datasets.make_blobs(n_samples=100, centers=3, cluster_std=0.05, n_features=10, shuffle=True, random_state=31)[0], "1000_blobs_10_feat")
+save_dataset(datasets.make_blobs(n_samples=1000, centers=3, cluster_std=5, n_features=10, shuffle=True, random_state=31)[0], "1000_blobs_10_feat")
 
 # symmetric matrix
 a = np.random.rand(1000, 1000)
@@ -232,7 +248,7 @@ save_dataset(m, "jacobi_input_10_6")' | python3
 		buffer
 	fi
 	
-	rm jacobi_input.csv &> /dev/null
+	rm jacobi_input_10_6.csv &> /dev/null
 	rm 1000_blobs_10_feat.csv &> /dev/null
 }
 
@@ -262,16 +278,18 @@ function test_efficiency_goal() {
 	if [[ $1 == "c" ]]; then
 	
 		if [[ $2 == "jacobi" ]]; then
-			time_result=$(timeout 15 bash -c "time ./spkmeans jacobi jacobi_input_10_6.csv 1> /dev/null" 2>&1) 
+			time_result=$(timeout 11.5 bash -c "time ./spkmeans jacobi jacobi_input_10_6.csv 1> /dev/null" 2>&1) 
 		else
-			time_result=$(timeout 0.04 bash -c "time ./spkmeans ${2} 1000_blobs_10_feat.csv 1> /dev/null" 2>&1) 
+			time_result=$(timeout 0.65 bash -c "time ./spkmeans ${2} 1000_blobs_10_feat.csv 1> /dev/null" 2>&1) 
 		fi
 	
 	else
 		if [[ $2 == "jacobi" ]]; then
-			time_result=$(timeout 3.5 bash -c "time python3 spkmeans.py 0 jacobi jacobi_input_10_6.csv 1> /dev/null" 2>&1) 
+			time_result=$(timeout 8 bash -c "time python3 spkmeans.py 0 jacobi jacobi_input_10_6.csv 1> /dev/null" 2>&1) 
+		elif [[ $2 == "spk" ]]; then
+			time_result=$(timeout 130 bash -c "time python3 spkmeans.py 0 spk 1000_blobs_10_feat.csv 1> /dev/null" 2>&1) 
 		else
-			time_result=$(timeout 1 bash -c "time python3 spkmeans.py 0 ${2} 1000_blobs_10_feat.csv 1> /dev/null" 2>&1) 
+			time_result=$(timeout 4.5 bash -c "time python3 spkmeans.py 0 ${2} 1000_blobs_10_feat.csv 1> /dev/null" 2>&1) 
 		fi
 	fi
 	
@@ -285,15 +303,17 @@ function test_efficiency_goal() {
 		
 		if [[ $1 == "c" ]]; then
 			if [[ $2 == "jacobi" ]]; then
-				echo -ne "8" >> $results_dir/efficiency_transcript_$1.txt
+				echo -ne "11.5" >> $results_dir/efficiency_transcript_$1.txt
 			else
-				echo -ne "0.04" >> $results_dir/efficiency_transcript_$1.txt
+				echo -ne "0.65" >> $results_dir/efficiency_transcript_$1.txt
 			fi
 		else
 			if [[ $2 == "jacobi" ]]; then
-				echo -ne "3.5" >> $results_dir/efficiency_transcript_$1.txt
+				echo -ne "8" >> $results_dir/efficiency_transcript_$1.txt
+			elif [[ $2 == "spk" ]]; then
+				echo -ne "130" >> $results_dir/efficiency_transcript_$1.txt
 			else
-				echo -ne "0.55" >> $results_dir/efficiency_transcript_$1.txt
+				echo -ne "4.5" >> $results_dir/efficiency_transcript_$1.txt
 			fi
 		fi
 		
@@ -311,7 +331,28 @@ function test_efficiency_goal() {
 # Organizer
 # =================
 function comprehensive_test() {
-	if [[ $skip_regular == "no" ]]; then
+
+	mkdir ./tmp &> /dev/null
+
+	# Trying to build the necessary resources
+	if [[ $interface == @(c|both) ]]; then
+		comp_output=$(bash comp.sh 2>&1) # compiling
+		if [[ ${#comp_output} -ne 0 ]]; then
+			echo -e "\e[1;31mFailed to compile your C module with \`\033[4;31mcomp.sh\e[0m\e[1;31m\`!\n"
+			youre_a_bozo
+		fi
+	fi
+	
+	if [[ $interface == @(py|both) ]]; then
+		build_output=$(python3 setup.py build_ext --inplace 2>&1 1>/dev/null)
+		if [[ ${#build_output} -ne 0 ]]; then
+			echo -e "\e[1;31mFailed to build the CPython extension with \`\033[4;31msetup.py\e[0m\e[1;31m\`!\n"
+			youre_a_bozo
+		fi
+	fi
+	
+	# Running the necessary tests
+	if [[ $regular == "yes" || $leaks == "yes" ]]; then
 		regular_test
 	fi
 	
@@ -321,7 +362,7 @@ function comprehensive_test() {
 	
 	
 	# Summary 
-	echo -e "\033[4;31m\e[1;31mNOTICE:\e[0m Detailed regular tests' results are in: \e[4;34m\e[1;34m${results_dir}/test_transcript_<interface>.txt\e[0m.\nDetailed memory leak tests' results have their memory reports at \e[4;34m\e[1;34m${results_dir}/memory_transcript_c.txt\e[0m.\nDetailed efficiency tests' results have their efficiency reports at \e[4;34m\e[1;34m${results_dir}/efficiency_transcript_<interface>.txt\e[0m.\n\e[4;37mOnly the results of failed tests will be viewed in the transcripts.\e[0m\n\n\n"
+	echo -e "\033[4;31m\e[1;31mDONE -> NOTICE:\e[0m\nDetailed regular tests' results are in: \e[1;34m${results_dir}/test_transcript_[c|py].txt\e[0m.\nDetailed memory leak tests' results have their memory reports at \e[1;34m${results_dir}/memory_transcript_c.txt\e[0m.\nDetailed efficiency tests' results have their efficiency reports at \e[1;34m${results_dir}/efficiency_transcript_[c|py].txt\e[0m.\n\e[4;37mOnly the results of failed tests will be viewed in the transcripts.\e[0m"
 }
 
 
@@ -332,37 +373,33 @@ function comprehensive_test() {
 # PRELUDE
 # =================
 function instructions() {
-	echo -e "\e[4;37m\e[1;37mHelp\e[0m: bash yuval_tester.sh <testfiles> <interface> <skip_regular> <leaks> <efficiency> [results_dir]\n
-- testfiles: 	Specifies the path to the directory containing the test files that were supplied with this test.
-- interface:	Specifies which interface you want to test. Any of the following: [c/py/both]
-- skip_regular:	Specifies whether to skip the regular tests. Any of the following: [yes/no]
-- leaks:	Specified if you want memory leak tests. Applies to the \e[4;37m\e[1;37mC\e[0m interface only: [yes/no]
-- efficiency:	Specifies whether you want an efficiency test on the interfaces you chose Any of the following: [yes/no]
-- results_dir:	Specifies the path of the directory you wish store the tests' results into (default: running directory)
+	echo -e "\e[4;37m\e[1;37mHelp\e[0m: bash tester.sh <testfiles> <interface> <regular> <leaks> <efficiency> [results_dir]\n
+- testfiles	<path>: 	The path of the directory containing the test files that were supplied with this test.
+- interface 	[c|py|both]:	Specifies the interface you want to test.
+- regular 	[yes|no]:	Specifies whether to run the regular tests or not.
+- leaks		[yes|no]:	Specifies if you want memory leak tests. Applies to the \e[4;37m\e[1;37mC\e[0m interface only.
+- efficiency	[yes|no]:	Specifies whether you want an efficiency test on the interfaces you chose.
+- results_dir	<path>:		Creates a new directory to store the tests' results into (default: running directory).
 
 \e[4;37m\e[1;37mNotes\e[0m: 
 (1) The efficiency tests are quite long, take that into account.
 (2) Detailed regular tests' results are saved into \`\033[4;37mtest_transcript_<interface>.txt\e[0m\`.
-Only failed tests' results are saved into the transcripts.
 (3) Detailed memory leak tests' results are saved into \`\033[4;37mmemory_transcript_c.txt\e[0m\`.
-Only failed tests' results are saved into the transcript.
-(4) Detailed Efficiency tests' outputs are saved into \`\033[4;37mefficiency_transcript_<interface>.txt\e[0m\`.
-Only failed efficiency tests' results are saved into the transcript.
+(4) Detailed Efficiency tests' results are saved into \`\033[4;37mefficiency_transcript_<interface>.txt\e[0m\`.
+(5) Only failed tests' results are saved into their transcript.
+(6) Efficiency tests become invalid when running on tau-related server (e.g., nova).
 
 \e[4;37m\e[1;37mInstructions\e[0m:
-(1) Be sure to remove any build/dist/egg files from the working directory. Could
-potentially lead to undefined behaviors of the test script.
-(2) Don't run this script from hosts that have the \`/tmp\` directory
-write-protected. Else, you would need to change a few arguments here and there.
-(3) You shall place this shell script and the \`\033[4;37mtestfiles\e[0m\` directory (that came in the zip)
-within the directory that contains all of the files that you need to assign."
+(1) Avoid any build/dist/egg directories/files from the working directory. Could potentially lead to undefined behaviors of the test script.
+(2) You shall run this shell script from within the directory that contains all of the files that you need to assign.
+(3) You shall install or have installed the package \`\e[4;37mvalgrind\e[0m\` if you wish to have memory leak tests."
 	exit
 }
 
 
 
 function youre_a_bozo() {
-	echo -e "
+	echo -e "\e[0m
  _               ____      _  _____ ___ ___            ____   ___ ________  
 | |        _    |  _ \    / \|_   _|_ _/ _ \     _    | __ ) / _ \__  / _ \ 
 | |      _| |_  | |_) |  / _ \ | |  | | | | |  _| |_  |  _ \| | | |/ / | | |
@@ -398,9 +435,12 @@ fi
 
 # blah2
 if [[ ! -d $1 ]]; then # testfiles
+	echo -e "\e[1;31mThe following directory is a non-existing directory \`\033[4;31m${1}\e[0m\e[1;31m\`!\n"
 	youre_a_bozo
 else
 	testers_path=$1
+	jacobi=$(ls $testers_path | grep "jacobi" | cut -d "_" -f2 | cut -d "." -f1 | sort -n | tail -n1)
+	spk=$(ls $testers_path | grep "spk" | cut -d "_" -f2 | cut -d "." -f1 | sort -n | tail -n1)
 fi
 
 # blah3
@@ -414,7 +454,7 @@ fi
 if [[ $3 != @(yes|no) ]]; then # leaks
 	youre_a_bozo
 else
-	skip_regular=$3
+	regular=$3
 fi
 
 # blah5

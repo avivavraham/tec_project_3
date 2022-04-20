@@ -1,6 +1,6 @@
 .DS_Store
 .vscode/
-cmake-build-Debug
+cmake-*
 CMakeLists.txt
 .idea
 tests

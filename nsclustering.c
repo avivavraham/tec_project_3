@@ -222,11 +222,10 @@ double Jacobi_find_diff_off(double **A,double **A_new, int n){
     int i,j;
     for(i=0;i<n;i++){
         for(j=0;j<n;j++){
-            if(i == j){
-                continue;
+            if(i != j){
+                sum_A += pow(A[i][j],2);
+                sum_A_new += pow(A_new[i][j],2);
             }
-            sum_A += pow(A[i][j],2);
-            sum_A_new += pow(A_new[i][j],2);
         }
     }
 
@@ -330,7 +329,7 @@ void Jacobi_algorithm(double **laplacian, int n, Eigen *eigen){
 
     set_matrix_to_Identity(V,n);
 
-    while(num_iter > 0 && diff >= epsilon){
+    while(num_iter > 0 && diff > epsilon){
         Point p = Jacobi_find_ij(A,n); /* 1.2.1.3 */
         /* 1.2.1.4 */
         int i = p.i;
@@ -409,7 +408,6 @@ int calculate_eigengap_heuristic(Eigen *eigens ,int n){
     }
 
     free(eigengap);
-    /* TODO: verify this */
     return argmax + 1; /* because according to the presentation we calculate the eigenvalues from 1 to n */
 }
 
@@ -456,10 +454,16 @@ double get_squared_sum_of_row(double ** matrix,int n, int r){
 
 void calculate_T_matrix(double ** T,double ** U,int n,int k){
     int i,j;
+    double sum;
 
-    for (i = 0; i < k; ++i){
-        for (j = 0; j < n; ++j){
-            T[i][j] = U[i][j] / sqrt(get_squared_sum_of_row(U,n,i));
+    for (i = 0; i < n; ++i){
+        for (j = 0; j < k; ++j){
+            sum = get_squared_sum_of_row(U,n,i);
+            if (sum == 0){
+                T[i][j] = 0.0000;
+            } else{
+                T[i][j] = U[i][j] / pow(sum,0.5);
+            }
         }
     }
 }

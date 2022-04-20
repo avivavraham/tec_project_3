@@ -87,12 +87,16 @@ if __name__ == '__main__':
 
         if goal == "spk":
 
-            data_points = sp.spk()
+            data_points = sp.spk(K,d,num_rows,data_points.tolist())
+            data_points = np.array(data_points)
+            print("finished spk")
             K = len(data_points[0]) #if K == 0 then we found K in the heuristic 
             centroids = k_means_initialization(K, data_points, printIndex=True)
             max_iter = 300
             epsilon = 0.001
-            centroids = sp.kmeans(K, max_iter, d, num_rows, epsilon, centroids.tolist(), data_points.tolist())
+            # in this call d = k because every vector is in R^k 
+            d = K
+            centroids = sp.kmeans(K, max_iter, d, num_rows, epsilon, centroids.tolist(), data_points.tolist()) 
             for i in range(K):
                 for j in range(d):
                     num = "%.4f" % float(centroids[i][j])

@@ -41,9 +41,10 @@ void free_Eigen_struct(Eigen *eigen, int n);
 void Jacobi_set_Eigen(Eigen *eigen, int n, double **vectors, double **values);
 void sort_eigen(Eigen *eigen, int n);
 void set_U_matrix(double ** U,Eigen *eigen, int n, int k);
-double get_squared_sum_of_column(double ** matrix,int n, int c);
+double get_squared_sum_of_row(double ** matrix,int n, int c);
 void calculate_T_matrix(double ** T,double ** U,int n,int k);
 void print_eigenvalues(Eigen *eigen, int num_rows);
+void get_first_k_columns(double **to,double **from, int n, int k);
 
 
 #endif

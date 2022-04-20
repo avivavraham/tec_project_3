@@ -358,6 +358,7 @@ void Jacobi_algorithm(double **laplacian, int n, Eigen *eigen){
     }
 
     Jacobi_set_Eigen(eigen,n,V,A);
+    set_equal_array_2d(laplacian,V,n,n);
 
     free_array_2d(V,n);
     free_array_2d(A,n);
@@ -391,12 +392,12 @@ void sort_eigen(Eigen *eigen, int n){
 int calculate_eigengap_heuristic(Eigen *eigens ,int n){
     int i,argmax;
     double max=0;
-    double *eigengap = calloc(n, sizeof(double *));;
+    double *eigengap = calloc(n, sizeof(double));;
     error_occurred(eigengap == NULL);
 
     sort_eigen(eigens,n);
 
-    for(i=0;i<n-1;i++){ /* TODO: verify this calculation */
+    for(i=0;i<n-1;i++){
         eigengap[i] = eigens[i+1].value - eigens[i].value;
     }
 
@@ -424,18 +425,27 @@ void set_U_matrix(double ** U,Eigen *eigen, int n, int k){
             U[j][i] = eigen[i].vector[j];
         }
     }
+}
 
+void get_first_k_columns(double **to,double **from, int n, int k){
+    int i,j;
+
+    for (i = 0; i < k; ++i){
+        for (j = 0; j < n; ++j){
+            to[j][i] = from[j][i];
+        }
+    }
 }
 
 /*
  * the function return the squared sum of the column
  */
 
-double get_squared_sum_of_column(double ** matrix,int n, int c){
-    int i;
+double get_squared_sum_of_row(double ** matrix,int n, int r){
+    int c;
     double sum=0;
-    for(i=0;i<n;i++){
-        sum += pow(matrix[i][c],2);
+    for(c=0;c<n;c++){
+        sum += pow(matrix[r][c],2);
     }
     return sum;
 }
@@ -449,7 +459,7 @@ void calculate_T_matrix(double ** T,double ** U,int n,int k){
 
     for (i = 0; i < k; ++i){
         for (j = 0; j < n; ++j){
-            T[i][j] = U[i][j] / pow(get_squared_sum_of_column(U,n,j),0.5);
+            T[i][j] = U[i][j] / sqrt(get_squared_sum_of_row(U,n,i));
         }
     }
 }

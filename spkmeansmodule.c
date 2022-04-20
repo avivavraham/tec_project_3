@@ -8,7 +8,7 @@ to 2 dimensional double array (C object)
  */
 
 void convertPython2DArray(PyObject *python_arr,double **arr,int rows,int columns){
-    int i=0,j=0;
+    int i,j;
     PyObject *current_list,*item;
     for (i = 0; i < rows; i++) {
         current_list = PyList_GetItem(python_arr, i);
@@ -28,7 +28,7 @@ we return 2 dimensional PyObject
 */
 
 PyObject* createPyObjectFrom2DArray(double **arr,int rows,int columns, int k){
-    int i=0,j=0;
+    int i,j;
     PyObject *current,*result,*val;
 
     result = PyList_New(k);
@@ -57,9 +57,8 @@ We perceive the variables from the Python program, initialize the
 static PyObject* kmeans(PyObject *self, PyObject *args){
 
     PyObject *py_centroids,*py_data_points,*result;
-    int k, max_iter, num_rows, d = 1;
-    int *num_elements_in_cluster;
-    double **data_points, **centroids, **new_centroids, **clusters;
+    int k, max_iter, num_rows, d;
+    double **data_points, **centroids;
     double epsilon;
 
     /* This parses the Python arguments into a double (d)  variable named z and int (i) variable named n*/
@@ -73,16 +72,21 @@ static PyObject* kmeans(PyObject *self, PyObject *args){
     centroids = allocate_array_2d(k, d);
     data_points = allocate_array_2d(num_rows, d);
 
+/*    printf("size of centroids: %zd\n", PyList_Size(py_centroids));
+    printf("size of data points: %zd\n", PyList_Size(py_data_points));
+    printf("k= %d,d= %d, num_rows= %d\n",k,d,num_rows);*/
+
     convertPython2DArray(py_centroids,centroids,k,d);
     convertPython2DArray(py_data_points,data_points,num_rows,d);
 
     algorithm(k,d,num_rows,max_iter,data_points, centroids);
 
-    result = createPyObjectFrom2DArray(centroids,num_rows,d,k);
+    result = createPyObjectFrom2DArray(centroids,k,d,k);
 
-    free_array_2d(centroids, k);
-    free_array_2d(data_points,num_rows);
+//    print_matrix(centroids,k,d);
 
+//    free_array_2d(centroids, k);
+//    free_array_2d(data_points,num_rows);
 
     return result;
 }
@@ -98,7 +102,6 @@ static PyObject* spk(PyObject *self, PyObject *args){
         return NULL; /* In the CPython API, a NULL value is never valid for a
                         PyObject* so it is used to signal that an error has occurred. */
     }
-
     data_points = allocate_array_2d(num_rows, d);
     convertPython2DArray(py_data_points,data_points,num_rows,d);
 
@@ -107,9 +110,17 @@ static PyObject* spk(PyObject *self, PyObject *args){
     double** diagonal_degree_matrix = allocate_array_2d(num_rows, num_rows);
     calculate_diagonal_degree_matrix(diagonal_degree_matrix,weighted_matrix,num_rows);
 
+/*    printf("W matrix\n");
+    print_matrix(weighted_matrix,num_rows,num_rows);
+    printf("\ndiagonal matrix\n");
+    print_matrix(diagonal_degree_matrix,num_rows,num_rows);*/
+
+
     double** lnorm_matrix = allocate_array_2d(num_rows, num_rows);
     calculate_lnorm_matrix(lnorm_matrix,weighted_matrix,diagonal_degree_matrix,num_rows);
-    print_matrix(lnorm_matrix, num_rows, num_rows);
+
+/*    printf("\nlnorm matrix\n");
+    print_matrix(lnorm_matrix,num_rows,num_rows);*/
 
     eigen = calloc(num_rows, sizeof (Eigen));
     error_occurred(eigen == NULL);
@@ -117,17 +128,31 @@ static PyObject* spk(PyObject *self, PyObject *args){
     init_Eigen_struct(eigen,num_rows);
     Jacobi_algorithm(lnorm_matrix,num_rows,eigen);
 
+/*    printf("\nfinished jacobi\n");
+    print_matrix(lnorm_matrix,num_rows,num_rows);
+
+    printf("\neigen values\n");
+
+    print_eigenvalues(eigen,num_rows);*/
+
     if (k == 0){
         k = calculate_eigengap_heuristic(eigen,num_rows);
     }
+    error_occurred(k == 1);
 
     double** U_matrix = allocate_array_2d(num_rows, k);
     set_U_matrix(U_matrix,eigen,num_rows,k);
 
+/*    printf("\nfinished U\n");
+    print_matrix(U_matrix,num_rows,k);*/
+
     double** T_matrix = allocate_array_2d(num_rows, k);
     calculate_T_matrix(T_matrix,U_matrix,num_rows,k);
 
-    result = createPyObjectFrom2DArray(data_points,num_rows,k,k);
+/*    printf("\nfinished T\n");
+    print_matrix(T_matrix,num_rows,k);
+    printf("\n");*/
+    result = createPyObjectFrom2DArray(T_matrix,num_rows,k,num_rows);
 
     free_array_2d(lnorm_matrix, num_rows);
     free_array_2d(diagonal_degree_matrix,num_rows);
@@ -206,7 +231,6 @@ static PyObject* lnorm(PyObject *self, PyObject *args) {
 
     data_points = allocate_array_2d(num_rows, d);
     convertPython2DArray(py_data_points,data_points,num_rows,d);
-
 
     double** weighted_matrix = allocate_array_2d(num_rows, num_rows);
     calculate_weighted_matrix(weighted_matrix,data_points,num_rows,d);

@@ -71,6 +71,7 @@ if __name__ == '__main__':
         validate(args[0].isdigit())
         K = int(args[0])
         validate(K >= 0)
+        validate(K != 1)
 
         goal = args[1]
         file_path = args[2]
@@ -89,7 +90,6 @@ if __name__ == '__main__':
 
             data_points = sp.spk(K,d,num_rows,data_points.tolist())
             data_points = np.array(data_points)
-            print("finished spk")
             K = len(data_points[0]) #if K == 0 then we found K in the heuristic 
             centroids = k_means_initialization(K, data_points, printIndex=True)
             max_iter = 300
@@ -104,7 +104,6 @@ if __name__ == '__main__':
                         print(num)
                     else:
                         print(num, end=",")
-            print("")
 
         elif goal == "wam":
             sp.wam(d,num_rows,data_points.tolist())

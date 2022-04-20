@@ -346,6 +346,8 @@ void Jacobi_algorithm(double **laplacian, int n, Eigen *eigen){
         matrix_multiplication(V,n,n,P_matrix,n,result); /* 1.2.1.1.e */
         set_equal_array_2d(V,result,n,n);
 
+        zero_array_2d(result,n,n);
+
         transpose_matrix(P_matrix_transposed,P_matrix,n,n);
         matrix_multiplication(P_matrix_transposed,n,n,A,n,result); /* 1.2.1.1.e */
         matrix_multiplication(result,n,n,P_matrix,n,A_new); /* 1.2.1.1.e */
@@ -439,10 +441,10 @@ void get_first_k_columns(double **to,double **from, int n, int k){
  * the function return the squared sum of the column
  */
 
-double get_squared_sum_of_row(double ** matrix,int n, int r){
+double get_squared_sum_of_row(double ** matrix, int r, int len){
     int c;
     double sum=0;
-    for(c=0;c<n;c++){
+    for(c=0;c<len;c++){
         sum += pow(matrix[r][c],2);
     }
     return sum;
@@ -457,12 +459,12 @@ void calculate_T_matrix(double ** T,double ** U,int n,int k){
     double sum;
 
     for (i = 0; i < n; ++i){
+        sum = get_squared_sum_of_row(U,i,k);
         for (j = 0; j < k; ++j){
-            sum = get_squared_sum_of_row(U,n,i);
             if (sum == 0){
                 T[i][j] = 0.0000;
             } else{
-                T[i][j] = U[i][j] / pow(sum,0.5);
+                T[i][j] = U[i][j] / (sqrt(sum));
             }
         }
     }

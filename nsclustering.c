@@ -365,6 +365,7 @@ void Jacobi_algorithm(double **laplacian, int n, Eigen *eigen){
     free_array_2d(A,n);
     free_array_2d(A_new,n);
     free_array_2d(P_matrix,n);
+    free_array_2d(P_matrix_transposed,n);
     free_array_2d(result,n);
 }
 

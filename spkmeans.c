@@ -68,6 +68,7 @@ int main(int argc, char **argv) {
         print_matrix(eigenvectors,num_rows,num_rows);
 
         free_Eigen_struct(eigen,num_rows);
+        free_array_2d(eigenvectors,num_rows);
 
     } else{
         free_array_2d(data_points,num_rows);

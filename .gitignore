@@ -12,6 +12,7 @@ output.txt
 yuval_tester.sh
 testfiles
 project_comprehensive_test
+output*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

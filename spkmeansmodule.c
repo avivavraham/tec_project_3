@@ -85,8 +85,8 @@ static PyObject* kmeans(PyObject *self, PyObject *args){
 
 //    print_matrix(centroids,k,d);
 
-//    free_array_2d(centroids, k);
-//    free_array_2d(data_points,num_rows);
+    free_array_2d(centroids, k);
+    free_array_2d(data_points,num_rows);
 
     return result;
 }

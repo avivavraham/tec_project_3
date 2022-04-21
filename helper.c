@@ -152,7 +152,8 @@ when the difference squared distance of all the centroids is smaller than epsilo
 void algorithm(int k, int d, int num_rows, int max_iter, double **data_points, double **centroids) {
     int i, j;
     double diff, sq_diff, max, epsilon = 0.001;
-    double *sum_diff_centroids,*num_elements_in_cluster;
+    int *num_elements_in_cluster;
+    double *sum_diff_centroids;
     double **new_centroids,**clusters;
 
     num_elements_in_cluster = calloc(k, sizeof(int));
@@ -195,7 +196,6 @@ void algorithm(int k, int d, int num_rows, int max_iter, double **data_points, d
     }
     free(sum_diff_centroids);
     free_array_2d(new_centroids, k);
-    free_array_2d(data_points, num_rows);
     free_array_2d(clusters, k);
     free(num_elements_in_cluster);
 }

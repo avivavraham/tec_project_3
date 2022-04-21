@@ -98,7 +98,7 @@ the function iterate through all the data points and assigns each to the closest
 it calculates the num elements in each cluster
 */
 
-void set_clusters(int k,int d, int num_rows, double *num_elements_in_cluster,double **centroids, double **clusters, double **data_points) {
+void set_clusters(int k,int d, int num_rows, int *num_elements_in_cluster,double **centroids, double **clusters, double **data_points) {
     int index, i, a;
 
     for (i = 0; i < k; i++) {
@@ -116,7 +116,7 @@ void set_clusters(int k,int d, int num_rows, double *num_elements_in_cluster,dou
 /*
 the function calculate the centroids by the new clusters that was already calculated
 */
-void calculate_new_centroids(int k,int d,const double *num_elements_in_cluster,double** new_centroids, double **clusters) {
+void calculate_new_centroids(int k,int d,const int *num_elements_in_cluster,double** new_centroids, double **clusters) {
     double *cluster;
     int len_cluster, i, j;
 

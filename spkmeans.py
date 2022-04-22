@@ -100,6 +100,8 @@ if __name__ == '__main__':
             for i in range(K):
                 for j in range(d):
                     num = "%.4f" % float(centroids[i][j])
+                    if num == 0: #change -0 to 0
+                        num = 0
                     if j == d - 1:
                         print(num)
                     else:

@@ -136,7 +136,7 @@ static PyObject* spk(PyObject *self, PyObject *args){
 
 static PyObject* wam(PyObject *self, PyObject *args) {
 
-    PyObject *py_data_points;
+    PyObject *py_data_points,*result;
     double **data_points;
     int num_rows,d;
 
@@ -151,16 +151,16 @@ static PyObject* wam(PyObject *self, PyObject *args) {
     double** weighted_matrix = allocate_array_2d(num_rows, num_rows);
     calculate_weighted_matrix(weighted_matrix,data_points,num_rows,d);
 
-    print_matrix(weighted_matrix,num_rows,num_rows);
+    result = createPyObjectFrom2DArray(weighted_matrix,num_rows,num_rows,num_rows);
 
     free_array_2d(weighted_matrix,num_rows);
     free_array_2d(data_points,num_rows);
-    Py_RETURN_NONE;
+    return result;
 }
 
 static PyObject* ddg(PyObject *self, PyObject *args) {
 
-    PyObject *py_data_points;
+    PyObject *py_data_points,*result;
     double **data_points;
     int num_rows,d;
 
@@ -177,12 +177,12 @@ static PyObject* ddg(PyObject *self, PyObject *args) {
     double** diagonal_degree_matrix = allocate_array_2d(num_rows, num_rows);
     calculate_diagonal_degree_matrix(diagonal_degree_matrix,weighted_matrix,num_rows);
 
-    print_matrix(diagonal_degree_matrix,num_rows,num_rows);
+    result = createPyObjectFrom2DArray(diagonal_degree_matrix,num_rows,num_rows,num_rows);
 
     free_array_2d(weighted_matrix,num_rows);
     free_array_2d(diagonal_degree_matrix,num_rows);
     free_array_2d(data_points,num_rows);
-    Py_RETURN_NONE;
+    return result;
 
 }
 
@@ -207,21 +207,21 @@ static PyObject* lnorm(PyObject *self, PyObject *args) {
     double** lnorm_matrix = allocate_array_2d(num_rows, num_rows);
     calculate_lnorm_matrix(lnorm_matrix,weighted_matrix,diagonal_degree_matrix,num_rows);
 
-    print_matrix(lnorm_matrix,num_rows,num_rows);
+    result = createPyObjectFrom2DArray(lnorm_matrix,num_rows,num_rows,num_rows);
 
     free_array_2d(weighted_matrix,num_rows);
     free_array_2d(diagonal_degree_matrix,num_rows);
     free_array_2d(lnorm_matrix,num_rows);
     free_array_2d(data_points,num_rows);
-    Py_RETURN_NONE;
+    return result;
 
 }
 
 static PyObject* jacobi(PyObject *self, PyObject *args) {
 
-    PyObject *py_symmetric_matrix;
-    double **symmetric_matrix, **eigenvectors;
-    int n;
+    PyObject *py_symmetric_matrix,*result;
+    double **symmetric_matrix, **eigen_matrix;
+    int n,j;
     Eigen *eigen;
 
     if(!PyArg_ParseTuple(args, "iO" , &n, &py_symmetric_matrix)) {
@@ -238,33 +238,21 @@ static PyObject* jacobi(PyObject *self, PyObject *args) {
     init_Eigen_struct(eigen,n);
     Jacobi_algorithm(symmetric_matrix,n,eigen);
 
-    print_eigenvalues(eigen,n);
+    eigen_matrix = allocate_array_2d(n+1, n); /*the first nXn is the vectors and the last row is the values*/
+    set_U_matrix(eigen_matrix,eigen,n,n);
 
-    eigenvectors = allocate_array_2d(n, n);
-    set_U_matrix(eigenvectors,eigen,n,n);
-    print_matrix(eigenvectors,n,n);
+    for (j=0;j<n;j++){
+        eigen_matrix[n][j] = eigen[j].value;
+    }
+
+    result = createPyObjectFrom2DArray(eigen_matrix,n+1,n,n+1);
+
 
     free_Eigen_struct(eigen,n);
     free_array_2d(symmetric_matrix,n);
-    Py_RETURN_NONE;
+    free_array_2d(eigen_matrix,n);
+    return result;
 }
-
-
-
-//TODO: delete this
-/*
- * This array tells Python what methods this module has.
- * We will use it in the next structure
- */
-//static PyMethodDef capiMethods[] = {
-//        {"fit",                   /* the Python method name that will be used */
-//                (PyCFunction) fit, /* the C-function that implements the Python function and returns static PyObject*  */
-//                     METH_VARARGS,           /* flags indicating parametersaccepted for this function */
-//                        PyDoc_STR("algorithm to find the clusters")}, /*  The docstring for the function */
-//        {NULL, NULL, 0, NULL}    /* The last entry must be all NULL as shown to act as a
-//                                 sentinel. Python looks for this entry to know that all
-//                                 of the functions for the module have been defined. */
-//};
 
 static PyMethodDef capiMethods[] = {
         {"kmeans",(PyCFunction) kmeans,METH_VARARGS,PyDoc_STR("Kmeans algorithm to find the clusters")},

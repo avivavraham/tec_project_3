@@ -55,6 +55,18 @@ def validate(condition):
         print('Invalid Input!')
         exit(1)
 
+def print_matrix(matrix,n,m):
+     for i in range(n):
+        for j in range(m):
+            num = "%.4f" % float(matrix[i][j])
+            if num == 0: #change -0 to 0
+                num = 0
+            if j == m - 1:
+                print(num)
+            else:
+                print(num, end=",")
+
+
 
 # this function gets the arguments from the user and process them to variables.
 # this function will fill variables- k(the number of centroids) max_iter(the max number of any iteration)
@@ -96,29 +108,32 @@ if __name__ == '__main__':
             epsilon = 0.001
             # in this call d = k because every vector is in R^k 
             d = K
-            centroids = sp.kmeans(K, max_iter, d, num_rows, epsilon, centroids.tolist(), data_points.tolist()) 
-            for i in range(K):
-                for j in range(d):
-                    num = "%.4f" % float(centroids[i][j])
-                    if num == 0: #change -0 to 0
-                        num = 0
-                    if j == d - 1:
-                        print(num)
-                    else:
-                        print(num, end=",")
+            centroids = sp.kmeans(K, max_iter, d, num_rows, epsilon, centroids.tolist(), data_points.tolist())
+            print_matrix(centroids,K,d)
 
         elif goal == "wam":
-            sp.wam(d,num_rows,data_points.tolist())
+            matrix = sp.wam(d,num_rows,data_points.tolist())
+            print_matrix(matrix,num_rows,num_rows)
 
         elif goal == "ddg":
-            sp.ddg(d,num_rows,data_points.tolist())
+            matrix = sp.ddg(d,num_rows,data_points.tolist())
+            print_matrix(matrix,num_rows,num_rows)
+
 
         elif goal == "lnorm":
-            sp.lnorm(d,num_rows,data_points.tolist())
+            matrix = sp.lnorm(d,num_rows,data_points.tolist())
+            print_matrix(matrix,num_rows,num_rows)
 
         elif goal == "jacobi":
-            #TODO: validate symmetric matrix
-            sp.jacobi(num_rows,data_points.tolist())
+            matrix = sp.jacobi(num_rows,data_points.tolist())
+            # first print the last row (the values) and then the first n rows
+            for j in range(num_rows):
+                num = "%.4f" % float(matrix[num_rows][j])
+                if j == num_rows-1:
+                    print(num)
+                else:
+                    print(num, end=",")
+            print_matrix(matrix,num_rows,num_rows)
 
     except Exception:
         traceback.print_exc()

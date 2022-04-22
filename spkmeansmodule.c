@@ -67,14 +67,8 @@ static PyObject* kmeans(PyObject *self, PyObject *args){
                         PyObject* so it is used to signal that an error has occurred. */
     }
 
-    // printf("K=%d, max_iter=%d, num_rows=%d, d=%d, epsilon=%f\n",k,max_iter,num_rows,d,epsilon);
-
     centroids = allocate_array_2d(k, d);
     data_points = allocate_array_2d(num_rows, d);
-
-/*    printf("size of centroids: %zd\n", PyList_Size(py_centroids));
-    printf("size of data points: %zd\n", PyList_Size(py_data_points));
-    printf("k= %d,d= %d, num_rows= %d\n",k,d,num_rows);*/
 
     convertPython2DArray(py_centroids,centroids,k,d);
     convertPython2DArray(py_data_points,data_points,num_rows,d);
@@ -82,8 +76,6 @@ static PyObject* kmeans(PyObject *self, PyObject *args){
     algorithm(k,d,num_rows,max_iter,data_points, centroids);
 
     result = createPyObjectFrom2DArray(centroids,k,d,k);
-
-//    print_matrix(centroids,k,d);
 
     free_array_2d(centroids, k);
     free_array_2d(data_points,num_rows);
@@ -110,30 +102,14 @@ static PyObject* spk(PyObject *self, PyObject *args){
     double** diagonal_degree_matrix = allocate_array_2d(num_rows, num_rows);
     calculate_diagonal_degree_matrix(diagonal_degree_matrix,weighted_matrix,num_rows);
 
-/*    printf("W matrix\n");
-    print_matrix(weighted_matrix,num_rows,num_rows);
-    printf("\ndiagonal matrix\n");
-    print_matrix(diagonal_degree_matrix,num_rows,num_rows);*/
-
-
     double** lnorm_matrix = allocate_array_2d(num_rows, num_rows);
     calculate_lnorm_matrix(lnorm_matrix,weighted_matrix,diagonal_degree_matrix,num_rows);
-
-/*    printf("\nlnorm matrix\n");
-    print_matrix(lnorm_matrix,num_rows,num_rows);*/
 
     eigen = calloc(num_rows, sizeof (Eigen));
     error_occurred(eigen == NULL);
 
     init_Eigen_struct(eigen,num_rows);
     Jacobi_algorithm(lnorm_matrix,num_rows,eigen);
-
-/*    printf("\nfinished jacobi\n");
-    print_matrix(lnorm_matrix,num_rows,num_rows);
-
-    printf("\neigen values\n");
-
-    print_eigenvalues(eigen,num_rows);*/
 
     if (k == 0){
         k = calculate_eigengap_heuristic(eigen,num_rows);
@@ -143,15 +119,9 @@ static PyObject* spk(PyObject *self, PyObject *args){
     double** U_matrix = allocate_array_2d(num_rows, k);
     set_U_matrix(U_matrix,eigen,num_rows,k);
 
-/*    printf("\nfinished U\n");
-    print_matrix(U_matrix,num_rows,k);*/
-
     double** T_matrix = allocate_array_2d(num_rows, k);
     calculate_T_matrix(T_matrix,U_matrix,num_rows,k);
 
-/*    printf("\nfinished T\n");
-    print_matrix(T_matrix,num_rows,k);
-    printf("\n");*/
     result = createPyObjectFrom2DArray(T_matrix,num_rows,k,num_rows);
 
     free_array_2d(lnorm_matrix, num_rows);
@@ -174,8 +144,6 @@ static PyObject* wam(PyObject *self, PyObject *args) {
         return NULL; /* In the CPython API, a NULL value is never valid for a
                         PyObject* so it is used to signal that an error has occurred. */
     }
-
-//    printf("d= %d, n= %d\n", d, num_rows);
 
     data_points = allocate_array_2d(num_rows, d);
     convertPython2DArray(py_data_points,data_points,num_rows,d);

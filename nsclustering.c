@@ -397,7 +397,7 @@ void sort_eigen(Eigen *eigen, int n){
  */
 
 int calculate_eigengap_heuristic(Eigen *eigens ,int n){
-    int i,argmax;
+    int i,argmax=0;
     double max=0;
     double *eigengap = calloc(n, sizeof(double));;
     error_occurred(eigengap == NULL);
